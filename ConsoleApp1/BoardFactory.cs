@@ -1,14 +1,15 @@
 ﻿using SFML.Graphics;
-
+namespace ConsoleApp1;
 class BoardFactory
 {
-    public Board board;
-    public Sprite desk;
+    public Board board { private set; get; }
+    public Sprite desk { get; }
 
-    public BoardFactory(int size)
+    private BoardFactory? _boardFactory;
+    private BoardFactory(int size)
     {
         size += 2;
-        board = Board.GetBoard(size);
+        board = new Board(size);
         for (int i = 0; i < size; ++i)
         {
             board.desk[i, 0] = -2;
@@ -23,4 +24,7 @@ class BoardFactory
 
         desk = new Sprite(texture.Texture);
     }
+
+    public BoardFactory GetBoard(int size) 
+        => _boardFactory ??= new BoardFactory(size);
 }

@@ -1,15 +1,14 @@
-﻿class Arbiter
+﻿namespace ConsoleApp1;
+class Arbiter
 {
     public int scoreWhite, scoreBlack;
     private Board _board;
 
-    private static Arbiter _arbiter;
-    private Arbiter()
+    public Arbiter(Board board)
     {
-        _board = Board.GetBoard(0);
+        scoreBlack = scoreWhite = 0;
+        _board = board;
     }
-    public static Arbiter GetArbiter() 
-        => _arbiter ??= new Arbiter();
 }
 
 static class KoChecker

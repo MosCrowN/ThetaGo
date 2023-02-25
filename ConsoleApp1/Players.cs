@@ -1,4 +1,5 @@
-﻿class Player
+﻿namespace ConsoleApp1;
+class Player
 {
     private bool _colour;
     
