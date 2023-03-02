@@ -6,13 +6,33 @@ namespace ConsoleApp1;
 class Layout: Drawable
 {
     public Sprite[]? Buttons { set; get; }
-
     public int[][]? ButtonBoarders { set; get; }
+    public RectangleShape[]? Sliders { set; get; }
+    
+    public int[]? SliderLevels { set; get; }
 
     private int _selected = -1;
 
+    private int _x, _y;
+
+    private (int dx, int dy) _slide;
+    public (int dx, int dy) Slide
+    {
+        private set
+        {
+            _slide.dx = value.dx;
+            _slide.dy = value.dy;
+            //TODO: change sliders size
+        }
+        get => _slide;
+    }
+
     public int Selected(int x, int y)
     {
+        Slide = (x - _x, y - _y);
+        _x = x;
+        _y = y;
+        
         if (Buttons == null || ButtonBoarders == null) return -1;
         for (var i = 0; i < Buttons.Length; ++i)
         {
@@ -20,9 +40,11 @@ class Layout: Drawable
                 y > ButtonBoarders[i][1] && y < ButtonBoarders[i][3])
                 return _selected = i;
         }
-        
+
         return _selected = -1;
-    } 
+    }
+    
+    //TODO: scrolling
 
     public void Draw(RenderTarget target, RenderStates states)
     {
@@ -30,14 +52,17 @@ class Layout: Drawable
         if (Buttons == null) return;
         foreach (var i in Buttons)
             target.Draw(i);
+        if (Sliders == null) return;
+        foreach (var i in Sliders)
+            target.Draw(i);
     }
 }
 
 static class ButtonFactory
 {
-    public static void MainMenu(ref Layout layout)
+    public static Layout MainMenu(float x, float y)
     {
-        float x = MainWindow.ScreenX, y = MainWindow.ScreenY;
+        var layout = new Layout();
         var texture = new Texture("button.png");
         layout.Buttons = new Sprite[4];
         layout.ButtonBoarders = new int[4][];
@@ -56,5 +81,7 @@ static class ButtonFactory
             };
             layout.ButtonBoarders[i] = new[] { x0, y0, x0 + x1, y0 + y1};
         }
+
+        return layout;
     }
 }

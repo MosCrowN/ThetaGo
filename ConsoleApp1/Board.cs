@@ -7,9 +7,9 @@ class Board : Drawable
     private Sprite? _sprite;
     
     public sbyte[,] Desk;
-    public Board(int size)
+    public Board()
     {
-        _size = size + 2;
+        _size = Settings.DeskSize + 2;
         Desk = new sbyte[_size, _size];
         
         for (int i = 0; i < _size; ++i)
@@ -27,6 +27,10 @@ class Board : Drawable
         _sprite = new Sprite(texture.Texture);
     }
 
+    public void MoveSelect(int x, int y)
+    {
+        
+    } 
     public void Draw(RenderTarget target, RenderStates states)
     {
         target.Draw(_sprite);
