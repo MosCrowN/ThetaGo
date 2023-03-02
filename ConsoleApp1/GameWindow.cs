@@ -23,7 +23,7 @@ internal class GameWindow : Window
         {
             _window.DispatchEvents();
             
-            _window.Clear();
+            _window.Clear(Color.White);
             _window.Draw(_board);
             _window.Display();
         }
@@ -31,12 +31,12 @@ internal class GameWindow : Window
 
     protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
-        throw new NotImplementedException();
+        
     }
 
     protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
-        throw new NotImplementedException();
+        
     }
 
     protected override void WindowOnKeyReleased(object? sender, KeyEventArgs e)
