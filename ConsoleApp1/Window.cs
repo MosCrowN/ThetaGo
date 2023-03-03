@@ -33,8 +33,8 @@ internal abstract class Window
 
     protected abstract void WindowOnKeyReleased(object? sender, KeyEventArgs e);
     
-    protected virtual void WindowClosed(object? sender, EventArgs e)
+    protected /*virtual*/ void WindowClosed(object? sender, EventArgs e)
     {
-        _window?.Close();
+        _window.Close();
     }
 }

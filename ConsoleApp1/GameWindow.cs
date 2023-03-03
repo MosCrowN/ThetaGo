@@ -9,11 +9,14 @@ internal class GameWindow : Window
 {
     private Board _board;
 
+    private BoardSprite _sprite;
+
     private int _ix, _iy;
 
     public GameWindow()
     {
-        _board = new Board((int)_window.Size.X, (int)_window.Size.Y);
+        _board = new Board();
+        _sprite = new BoardSprite(_board, (int)_window.Size.X, (int)_window.Size.Y);
     }
 
     public override void Loop()
@@ -23,15 +26,14 @@ internal class GameWindow : Window
             _window.DispatchEvents();
             
             _window.Clear(Color.White);
-            _window.Draw(_board);
+            _window.Draw(_sprite);
             _window.Display();
         }
     }
 
     protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
-        _board.Selected = (e.X, e.Y);
-        //Console.WriteLine(_board.Selected);
+        _sprite.Selected = (e.X, e.Y);
     }
 
     protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)

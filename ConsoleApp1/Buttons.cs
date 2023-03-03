@@ -1,6 +1,5 @@
 ﻿using SFML.Graphics;
 using SFML.System;
-//using UnityEngine;
 
 namespace ConsoleApp1;
 
@@ -61,6 +60,7 @@ class Layout: Drawable
 
 static class ButtonFactory
 {
+    private static RectangleShape _shape = new ();
     public static Layout MainMenu(float x, float y)
     {
         var layout = new Layout();
