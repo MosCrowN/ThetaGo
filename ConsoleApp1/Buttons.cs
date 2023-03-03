@@ -5,11 +5,13 @@ namespace ConsoleApp1;
 
 class Layout: Drawable
 {
-    public Sprite[]? Buttons { set; get; }
-    public int[][]? ButtonBoarders { set; get; }
-    public RectangleShape[]? Sliders { set; get; }
+    public Sprite[]? Buttons;
     
-    public int[]? SliderLevels { set; get; }
+    public int[][]? ButtonBoarders;
+    
+    public RectangleShape?[]? Sliders;
+
+    public int[]? SliderLevels;
 
     private int _selected = -1;
 
@@ -22,7 +24,18 @@ class Layout: Drawable
         {
             _slide.dx = value.dx;
             _slide.dy = value.dy;
-            //TODO: change sliders size
+            
+            if (_selected == -1 || Sliders == null ||
+                _selected >= Sliders.Length || Sliders[_selected] == null)
+                return;
+
+            if (SliderLevels == null) return;
+            var scale = Sliders[_selected]!.Scale + 
+                        new Vector2f(1 - (SliderLevels[_selected] - value.dx) /
+                            (float)SliderLevels[_selected], 0);
+            if (scale.X < 0) scale = new Vector2f(0, 1);
+            else if (scale.X > 1) scale = new Vector2f(1, 1);
+            Sliders[_selected]!.Scale = scale;
         }
         get => _slide;
     }
@@ -60,18 +73,36 @@ class Layout: Drawable
 
 static class ButtonFactory
 {
-    private static RectangleShape _shape = new ();
     public static Layout MainMenu(float x, float y)
     {
-        var layout = new Layout();
-        layout.Buttons = new Sprite[4];
-        layout.ButtonBoarders = new int[4][];
+        var layout = new Layout
+        {
+            Buttons = new Sprite[4],
+            ButtonBoarders = new int[4][]
+        };
+
+        layout.Sliders = new[]
+        {
+            new RectangleShape
+            {
+                Size = new Vector2f(x * 0.5f, 3),
+                FillColor = Color.Green,
+                Position = new Vector2f(0.25f * x, y / 6f)
+            }
+        };
+
+        layout.SliderLevels = new[]
+        {
+            (int)(x * 0.5f)
+        };
+
         for (var i = 0; i < 4; ++i)
         {
             var x0 = (int)(x * 0.25f);
             var y0 = (int)(y * (i + 1) / 6f);
             var x1 = (int)(0.5f * x);
             var y1 = (int)(0.15f * y);
+            
             layout.Buttons[i] = new Sprite
             {
                 Texture = Settings.MenuButton,
@@ -81,6 +112,17 @@ static class ButtonFactory
             };
             layout.ButtonBoarders[i] = new[] { x0, y0, x0 + x1, y0 + y1};
         }
+
+        return layout;
+    }
+
+    public static Layout Setting(float x, float y)
+    {
+        var layout = new Layout
+        {
+            Buttons = new Sprite[4],
+            ButtonBoarders = new int[4][]
+        };
 
         return layout;
     }

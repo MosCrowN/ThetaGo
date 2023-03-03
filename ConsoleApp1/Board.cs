@@ -80,26 +80,31 @@ class BoardSprite : Drawable
 
         var min = Math.Min(screenX, screenY);
         var size = (int)(min * 5 / 6f);
-        _shift = _step =  size / (Settings.DeskSize - 1);
+        _shift = _step = size / (Settings.DeskSize - 1);
         var texture = new RenderTexture((uint)(size + 3 + 2 * _shift),
             (uint)(size + 3 + 2 * _shift));
         texture.Clear();
-        
+
         var bg = new Sprite(Settings.DeskBg);
         bg.Scale = new Vector2f((float)texture.Size.X / Settings.DeskBg.Size.X,
             (float)texture.Size.Y / Settings.DeskBg.Size.Y);
         texture.Draw(bg);
 
-        _lineH = new RectangleShape();
-        _lineV = new RectangleShape();
-        _lineH.Size = new Vector2f((uint)(_step * (Settings.DeskSize - 1) + 3), 3);
-        _lineV.Size = new Vector2f(3, (uint)(_step * (Settings.DeskSize - 1) + 3));
-        _lineH.FillColor = Color.Black;
-        _lineV.FillColor = Color.Black;
+        _lineH = new RectangleShape
+        {
+            Size = new Vector2f((uint)(_step * (Settings.DeskSize - 1) + 3), 3),
+            FillColor = Color.Black
+        };
+        
+        _lineV = new RectangleShape
+        {
+            Size = new Vector2f(3, (uint)(_step * (Settings.DeskSize - 1) + 3)),
+            FillColor = Color.Black
+        };
 
         for (var i = 0; i < Settings.DeskSize; ++i)
         {
-            _lineH.Position = new Vector2f( _shift, i * _step + _shift);
+            _lineH.Position = new Vector2f(_shift, i * _step + _shift);
             _lineV.Position = new Vector2f(i * _step + _shift, _shift);
             texture.Draw(_lineH);
             texture.Draw(_lineV);
@@ -108,14 +113,14 @@ class BoardSprite : Drawable
         texture.Display();
         _sprite = new Sprite(texture.Texture);
         _sprite.Position = new Vector2f((min - size) / 2f - _shift, (min - size) / 2f - _shift);
-        
+
         _black = new Sprite(Settings.BlackStone);
         _black.Scale = new Vector2f((float)_step / Settings.BlackStone.Size.X,
             (float)_step / Settings.BlackStone.Size.Y);
         _white = new Sprite(Settings.WhiteStone);
         _white.Scale = new Vector2f((float)_step / Settings.WhiteStone.Size.X,
             (float)_step / Settings.WhiteStone.Size.Y);
-        
+
         _lineH.FillColor = Color.White;
         _lineV.FillColor = Color.White;
     }
