@@ -9,6 +9,8 @@ class Board : Drawable
 
     private Sprite _sprite, _black, _white;
 
+    private RectangleShape _lineH, _lineV;
+
     public States[,] Desk;
 
     private (int ix, int iy) _select;
@@ -19,8 +21,13 @@ class Board : Drawable
         {
             _select.ix = (int)Math.Round((value.ix - _sprite.Position.X) / _step);
             _select.iy = (int)Math.Round((value.iy - _sprite.Position.Y) / _step);
+            
+            _lineH.Position = new Vector2f(0, _select.iy * _step);
+            _lineV.Position = new Vector2f(_select.ix * _step, 0);
+            _lineH.Position += _sprite.Position;
+            _lineV.Position += _sprite.Position;
         }
-        get => _select;
+        //get => _select;
     }
 
     //TODO: use screen sizes
@@ -36,20 +43,21 @@ class Board : Drawable
         //TODO: set background picture
         texture.Clear(Color.Yellow);
 
-        RectangleShape lineH = new(), lineV = new();
-        lineH.Size = new Vector2f((uint)(_step * _size + 3), 3);
-        lineV.Size = new Vector2f(3, (uint)(_step * _size + 3));
-        lineH.FillColor = Color.Black;
-        lineV.FillColor = Color.Black;
+        _lineH = new RectangleShape();
+        _lineV = new RectangleShape();
+        _lineH.Size = new Vector2f((uint)(_step * _size + 3), 3);
+        _lineV.Size = new Vector2f(3, (uint)(_step * _size + 3));
+        _lineH.FillColor = Color.Black;
+        _lineV.FillColor = Color.Black;
 
         _size += 3;
         Desk = new States[_size, _size];
         for (var i = 0; i < _size; ++i)
         {
-            lineH.Position = new Vector2f(0, i * _step);
-            lineV.Position = new Vector2f(i * _step, 0);
-            texture.Draw(lineH);
-            texture.Draw(lineV);
+            _lineH.Position = new Vector2f(0, i * _step);
+            _lineV.Position = new Vector2f(i * _step, 0);
+            texture.Draw(_lineH);
+            texture.Draw(_lineV);
 
             for (var j = 0; j < _size; ++j)
                 Desk[i, j] = States.Free;
@@ -70,6 +78,9 @@ class Board : Drawable
         _white = new Sprite(Settings.WhiteStone);
         _white.Scale = new Vector2f((float)_step / Settings.WhiteStone.Size.X,
             (float)_step / Settings.WhiteStone.Size.Y);
+        
+        _lineH.FillColor = Color.White;
+        _lineV.FillColor = Color.White;
     }
 
     private static bool _isWhite { set; get; }
@@ -91,6 +102,8 @@ class Board : Drawable
     public void Draw(RenderTarget target, RenderStates states)
     {
         target.Draw(_sprite);
+        target.Draw(_lineH);
+        target.Draw(_lineV);
 
         var size = _size - 1;
         for (var ix = 0; ix < size; ++ix)
@@ -122,4 +135,9 @@ class Board : Drawable
         Free = 0,
         Edge = 2,
     }
+}
+
+class BoardSprite : Drawable
+{
+    
 }
