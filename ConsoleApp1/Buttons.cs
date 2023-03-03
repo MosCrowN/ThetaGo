@@ -1,5 +1,6 @@
 ﻿using SFML.Graphics;
 using SFML.System;
+//using UnityEngine;
 
 namespace ConsoleApp1;
 
@@ -63,7 +64,6 @@ static class ButtonFactory
     public static Layout MainMenu(float x, float y)
     {
         var layout = new Layout();
-        var texture = new Texture("button.png");
         layout.Buttons = new Sprite[4];
         layout.ButtonBoarders = new int[4][];
         for (var i = 0; i < 4; ++i)
@@ -74,9 +74,9 @@ static class ButtonFactory
             var y1 = (int)(0.15f * y);
             layout.Buttons[i] = new Sprite
             {
-                Texture = texture,
-                Scale = new Vector2f((float)x1 / texture.Size.X,
-                    (float)y1 / texture.Size.Y),
+                Texture = Settings.MenuButton,
+                Scale = new Vector2f((float)x1 / Settings.MenuButton.Size.X,
+                    (float)y1 / Settings.MenuButton.Size.Y),
                 Position = new Vector2f(x0, y0)
             };
             layout.ButtonBoarders[i] = new[] { x0, y0, x0 + x1, y0 + y1};

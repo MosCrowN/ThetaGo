@@ -13,12 +13,11 @@ internal class GameWindow : Window
 
     public GameWindow()
     {
-        _board = new Board();
+        _board = new Board((int)_window.Size.X, (int)_window.Size.Y);
     }
 
     public override void Loop()
     {
-        if (_window == null) return;
         while (_window.IsOpen)
         {
             _window.DispatchEvents();
@@ -31,12 +30,13 @@ internal class GameWindow : Window
 
     protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
-        
+        _board.Selected = (e.X, e.Y);
+        //Console.WriteLine(_board.Selected);
     }
 
     protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
-        
+        _board.PutStone();
     }
 
     protected override void WindowOnKeyReleased(object? sender, KeyEventArgs e)
@@ -64,7 +64,7 @@ internal class GameWindow : Window
                     _ix = 1;
                 break;
             case Keyboard.Key.Escape:
-                _window?.Close();
+                _window.Close();
                 break;
         }
     }

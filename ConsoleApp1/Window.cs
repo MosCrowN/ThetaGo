@@ -5,7 +5,7 @@ namespace ConsoleApp1;
 
 internal abstract class Window
 {
-    protected RenderWindow? _window;
+    protected RenderWindow _window;
 
     protected Layout? _layout;
 
