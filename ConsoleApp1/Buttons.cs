@@ -9,12 +9,13 @@ internal class Button : Drawable
 
     public RectangleShape? R;
 
-    public bool IsSlider;
+    //TODO: paint the pressed button and make noise
+    //public bool IsActivated;
     
     public void Draw(RenderTarget target, RenderStates states)
     {
         target.Draw(S);
-        if (IsSlider)
+        if (R != null)
             target.Draw(R);
     }
 }
@@ -27,21 +28,22 @@ internal class ButtonLayout: Drawable
 
     public int Selected(int x, int y, bool isPressed)
     {
-        if (Buttons == null) return -1;
         _selected = -1;
+        if (Buttons == null) return -1;
+        
         for (var i = 0; i < Buttons.Length; ++i)
         {
             if (x < Buttons[i].S!.Position.X || x > (Buttons[i].S!.Position.X + Buttons[i].S!.Texture.Size.X * Buttons[i].S!.Scale.X) ||
                 y < Buttons[i].S!.Position.Y || y > (Buttons[i].S!.Position.Y + Buttons[i].S!.Texture.Size.Y * Buttons[i].S!.Scale.Y)) 
                 continue;
             _selected = i;
-            if (!Buttons[_selected].IsSlider || !isPressed) return _selected;
+            if (Buttons[_selected].R == null || !isPressed) return _selected;
             var scale = new Vector2f((x - Buttons[_selected].R!.Position.X) / Buttons[_selected].R!.Size.X, 1);
             scale.X = scale.X < 0 ? 0 : (scale.X > 1 ? 1 : scale.X);
             Buttons[_selected].R!.Scale = scale;
         }
 
-        return -1;
+        return _selected;
     }
 
     public float Slider
@@ -58,7 +60,6 @@ internal class ButtonLayout: Drawable
 
     public void Draw(RenderTarget target, RenderStates states)
     {
-        //TODO: paint the pressed button and make noise
         if (Buttons == null) return;
         foreach (var i in Buttons)
             target.Draw(i);
@@ -69,12 +70,13 @@ internal static class LayoutFactory
 {
     public static ButtonLayout MainMenu(float x, float y)
     {
+        const int n = 4;
         var layout = new ButtonLayout
         {
-            Buttons = new Button[4]
+            Buttons = new Button[n]
         };
 
-        for (var i = 0; i < 4; ++i)
+        for (var i = 0; i < n; ++i)
             layout.Buttons[i] = new Button
             {
                 S = new Sprite
@@ -86,24 +88,38 @@ internal static class LayoutFactory
                 }
             };
 
-        layout.Buttons[0].IsSlider = true;
-        layout.Buttons[0].R = new RectangleShape
-        { 
-            Size = new Vector2f(x * 0.5f, 3), 
-            FillColor = Color.Green, 
-            Position = new Vector2f(0.25f * x, y / 6f)
-        };
-
         return layout;
     }
 
     public static ButtonLayout Settings(float x, float y)
     {
+        const int n = 5, n1 = 3;
+
         var layout = new ButtonLayout
         {
-            Buttons = new Button[4],
-            //Sliders = new RectangleShape?[4]
+            Buttons = new Button[n]
         };
+
+        for (var i = 0; i < n; ++i)
+            layout.Buttons[i] = new Button
+            {
+                S = new Sprite
+                {
+                    Texture = Params.MenuButton,
+                    Scale = new Vector2f((0.35f * x) / Params.MenuButton.Size.X,
+                        (0.125f * y) / Params.MenuButton.Size.Y),
+                    Position = new Vector2f(x * (1 - 0.35f) / 2, y * (i + 1) / 7f)
+                }
+            };
+
+        for (var i = 0; i < n1; ++i)
+            layout.Buttons[i].R = new RectangleShape
+            {
+                Size = new Vector2f(x * 0.35f, 3),
+                FillColor = Color.Green,
+                Position = new Vector2f(layout.Buttons[i].S!.Position.X,
+                    layout.Buttons[i].S!.Position.Y + 0.0625f * y)
+            };
 
         return layout;
     }

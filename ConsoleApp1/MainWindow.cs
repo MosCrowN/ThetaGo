@@ -29,7 +29,7 @@ internal class MainWindow : Window
             SfWindow.Display();
         }
         
-        Params.Ost.Stop();
+        Params.Ost.Pause();
     }
 
     protected override void SfWindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
@@ -52,6 +52,9 @@ internal class MainWindow : Window
         switch (Select)
         {
             case 1:
+                IsOpen = false;
+                break;
+            case 2:
                 IsOpen = false;
                 break;
             case 3:
