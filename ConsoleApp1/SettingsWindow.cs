@@ -29,9 +29,19 @@ internal class SettingsWindow : Window
     {
         if (Layout == null) return;
         Select = Layout.Selected(e.X, e.Y, IsMousePressed);
-        if (!IsMousePressed || Select != 0) return;
-        Params.MusicVolume = Layout!.Slider;
-        Params.Ost.Volume = Params.MusicVolume;
+        if (!IsMousePressed) return;
+        switch (Select)
+        {
+            case 0:
+                Params.MusicVolume = Layout!.Slider;
+                Layout!.Buttons![0].UpdTxt(Params.MusicVolume);
+                Params.Ost.Volume = Params.MusicVolume;
+                break;
+            case 1:
+                Params.DeskSize = Layout!.Slider;
+                Layout!.Buttons![1].UpdTxt(Params.DeskSize); 
+                break;
+        }
     }
 
     protected override void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
@@ -39,6 +49,18 @@ internal class SettingsWindow : Window
         if (e.Button == Mouse.Button.Left) IsMousePressed = true;
         if (Layout == null) return;
         Select = Layout.Selected(e.X, e.Y, true);
+        switch (Select)
+        {
+            case 0:
+                Params.MusicVolume = Layout!.Slider;
+                Layout!.Buttons![0].UpdTxt(Params.MusicVolume);
+                Params.Ost.Volume = Params.MusicVolume;
+                break;
+            case 1:
+                Params.DeskSize = Layout!.Slider;
+                Layout!.Buttons![1].UpdTxt(Params.DeskSize);
+                break;
+        }
     }
 
     protected override void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
@@ -47,13 +69,6 @@ internal class SettingsWindow : Window
         if (e.Button != Mouse.Button.Left) return;
         switch (Select)
         {
-            case 0:
-                Params.MusicVolume = Layout!.Slider;
-                Params.Ost.Volume = Params.MusicVolume;
-                break;
-            case 1:
-                Params.DeskSize = Layout!.Slider; 
-                break;
             case 4:
                 IsOpen = false;
                 break;

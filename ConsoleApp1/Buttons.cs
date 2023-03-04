@@ -9,14 +9,28 @@ internal class Button : Drawable
 
     public RectangleShape? R;
 
+    public Text? T;
+
     //TODO: paint the pressed button and make noise
     //public bool IsActivated;
+    public void UpdTxt(int value)
+    {
+        var str = string.Empty;
+        foreach (var i in T!.DisplayedString)
+        {
+            str += i;
+            if (i != ':') continue;
+            T!.DisplayedString = str + ' ' + value;
+            return;
+        }
+    }
     
     public void Draw(RenderTarget target, RenderStates states)
     {
         target.Draw(S);
         if (R != null)
             target.Draw(R);
+        target.Draw(T);
     }
 }
 
@@ -33,12 +47,15 @@ internal class ButtonLayout: Drawable
         
         for (var i = 0; i < Buttons.Length; ++i)
         {
-            if (x < Buttons[i].S!.Position.X || x > (Buttons[i].S!.Position.X + Buttons[i].S!.Texture.Size.X * Buttons[i].S!.Scale.X) ||
-                y < Buttons[i].S!.Position.Y || y > (Buttons[i].S!.Position.Y + Buttons[i].S!.Texture.Size.Y * Buttons[i].S!.Scale.Y)) 
+            var lx = (int)(x - Buttons[i].S!.Position.X);
+            var ly = (int)(y - Buttons[i].S!.Position.Y);
+            if (lx < 0 || lx > Buttons[i].S!.GetGlobalBounds().Width ||
+                ly < 0 || ly > Buttons[i].S!.GetGlobalBounds().Height) 
                 continue;
             _selected = i;
+            //TODO: change the button text
             if (Buttons[_selected].R == null || !isPressed) return _selected;
-            var scale = new Vector2f((x - Buttons[_selected].R!.Position.X) / Buttons[_selected].R!.Size.X, 1);
+            var scale = new Vector2f(lx / Buttons[_selected].R!.Size.X, 1);
             scale.X = scale.X < 0 ? 0 : (scale.X > 1 ? 1 : scale.X);
             Buttons[_selected].R!.Scale = scale;
         }
@@ -68,6 +85,18 @@ internal class ButtonLayout: Drawable
 
 internal static class LayoutFactory
 {
+    private static string _mainMenu(int n)
+    {
+        return n switch
+        {
+            0 => "Load game",
+            1 => "New game",
+            2 => "Settings",
+            3 => "Exit",
+            _ => ""
+        };
+    }
+    //TODO: centralize the text
     public static ButtonLayout MainMenu(float x, float y)
     {
         const int n = 4;
@@ -77,6 +106,7 @@ internal static class LayoutFactory
         };
 
         for (var i = 0; i < n; ++i)
+        {
             layout.Buttons[i] = new Button
             {
                 S = new Sprite
@@ -85,10 +115,39 @@ internal static class LayoutFactory
                     Scale = new Vector2f((0.5f * x) / Params.MenuButton.Size.X,
                         (0.15f * y) / Params.MenuButton.Size.Y),
                     Position = new Vector2f(x * 0.25f, y * (i + 1) / 6f)
+                },
+                T = new Text
+                {
+                    Font = Params.Albert,
+                    FillColor = Color.Magenta,
+                    CharacterSize = 500,
+                    DisplayedString = _mainMenu(i)
                 }
             };
+            
+            var size = new Vector2f(layout.Buttons[i].S!.GetGlobalBounds().Width, 
+                layout.Buttons[i].S!.GetGlobalBounds().Height);
+            var oldTextSize = new Vector2f(layout.Buttons[i].T!.GetGlobalBounds().Width,
+                layout.Buttons[i].T!.GetGlobalBounds().Height);
+            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length / 25f * size.X, 0.33f * size.Y);
+            layout.Buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
+            layout.Buttons[i].T!.Position = layout.Buttons[i].S!.Position + (size - newTextSize) / 2f;
+        }
 
         return layout;
+    }
+    
+    private static string _settings(int n)
+    {
+        return n switch
+        {
+            0 => "Music volume: 100",
+            1 => "Desk size: 19",
+            2 => "Difficulty: 10",
+            3 => "Multiplayer",
+            4 => "Save & Back",
+            _ => ""
+        };
     }
 
     public static ButtonLayout Settings(float x, float y)
@@ -101,16 +160,34 @@ internal static class LayoutFactory
         };
 
         for (var i = 0; i < n; ++i)
+        {
             layout.Buttons[i] = new Button
             {
+
                 S = new Sprite
                 {
                     Texture = Params.MenuButton,
                     Scale = new Vector2f((0.35f * x) / Params.MenuButton.Size.X,
                         (0.125f * y) / Params.MenuButton.Size.Y),
                     Position = new Vector2f(x * (1 - 0.35f) / 2, y * (i + 1) / 7f)
+                },
+                T = new Text
+                {
+                    Font = Params.Albert,
+                    FillColor = Color.Magenta,
+                    CharacterSize = 500,
+                    DisplayedString = _settings(i)
                 }
             };
+            
+            var size = new Vector2f(layout.Buttons[i].S!.GetGlobalBounds().Width, 
+                layout.Buttons[i].S!.GetGlobalBounds().Height);
+            var oldTextSize = new Vector2f(layout.Buttons[i].T!.GetGlobalBounds().Width,
+                layout.Buttons[i].T!.GetGlobalBounds().Height);
+            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length / 25f * size.X, 0.33f * size.Y);
+            layout.Buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
+            layout.Buttons[i].T!.Position = layout.Buttons[i].S!.Position + (size - newTextSize) / 2f;
+        }
 
         for (var i = 0; i < n1; ++i)
             layout.Buttons[i].R = new RectangleShape
@@ -120,9 +197,9 @@ internal static class LayoutFactory
                 Position = new Vector2f(layout.Buttons[i].S!.Position.X,
                     layout.Buttons[i].S!.Position.Y + 0.0625f * y)
             };
-        
+
         layout.Buttons[0].R!.Scale = new Vector2f(Params.MusicVolume / 100f, 1);
-        layout.Buttons[1].R!.Scale = new Vector2f(Params.DeskSize / 35f,1);
+        layout.Buttons[1].R!.Scale = new Vector2f(Params.DeskSize / 35f, 1);
 
         return layout;
     }
