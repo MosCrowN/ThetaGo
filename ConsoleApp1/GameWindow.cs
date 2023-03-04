@@ -36,6 +36,11 @@ internal class GameWindow : Window
         _sprite.Selected = (e.X, e.Y);
     }
 
+    protected override void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
+    {
+        
+    }
+
     protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
         _board.PutStone();

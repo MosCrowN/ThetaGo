@@ -6,57 +6,40 @@ namespace ConsoleApp1;
 class Layout: Drawable
 {
     public Sprite[]? Buttons;
-    
-    public int[][]? ButtonBoarders;
-    
-    public RectangleShape?[]? Sliders;
 
-    public int[]? SliderLevels;
+    public RectangleShape?[]? Sliders;
 
     private int _selected = -1;
 
-    private int _x, _y;
-
-    private (int dx, int dy) _slide;
-    public (int dx, int dy) Slide
+    public int Selected(int x, int y, bool isPressed)
     {
-        private set
-        {
-            _slide.dx = value.dx;
-            _slide.dy = value.dy;
-            
-            if (_selected == -1 || Sliders == null ||
-                _selected >= Sliders.Length || Sliders[_selected] == null)
-                return;
-
-            if (SliderLevels == null) return;
-            var scale = Sliders[_selected]!.Scale + 
-                        new Vector2f(1 - (SliderLevels[_selected] - value.dx) /
-                            (float)SliderLevels[_selected], 0);
-            if (scale.X < 0) scale = new Vector2f(0, 1);
-            else if (scale.X > 1) scale = new Vector2f(1, 1);
-            Sliders[_selected]!.Scale = scale;
-        }
-        get => _slide;
-    }
-
-    public int Selected(int x, int y)
-    {
-        Slide = (x - _x, y - _y);
-        _x = x;
-        _y = y;
-        
-        if (Buttons == null || ButtonBoarders == null) return -1;
+        if (Buttons == null) return -1;
         for (var i = 0; i < Buttons.Length; ++i)
         {
-            if (x > ButtonBoarders[i][0] && x < ButtonBoarders[i][2] &&
-                y > ButtonBoarders[i][1] && y < ButtonBoarders[i][3])
-                return _selected = i;
+            if (x < Buttons[i].Position.X || x > (Buttons[i].Position.X + Buttons[i].Texture.Size.X * Buttons[i].Scale.X) ||
+                y < Buttons[i].Position.Y || y > (Buttons[i].Position.Y + Buttons[i].Texture.Size.Y * Buttons[i].Scale.Y)) 
+                continue;
+            _selected = i;
+            Console.WriteLine(Buttons[i].Position);
+            if (_selected == -1 || Sliders?[_selected] == null || !isPressed) return _selected;
+            var scale = new Vector2f((x - Sliders[_selected]!.Position.X) / Sliders[_selected]!.Size.X, 1);
+            scale.X = scale.X < 0 ? 0 : (scale.X > 1 ? 1 : scale.X);
+            Sliders![_selected]!.Scale = scale;
         }
 
-        return _selected = -1;
+        return _selected;
     }
-    
+
+    public float Slider
+    {
+        get
+        {
+            if (_selected < 0 || Sliders?[_selected] == null)
+                return -1;
+            return Sliders[_selected]!.Scale.X;
+        }
+    }
+
     //TODO: scrolling
 
     public void Draw(RenderTarget target, RenderStates states)
@@ -67,7 +50,7 @@ class Layout: Drawable
             target.Draw(i);
         if (Sliders == null) return;
         foreach (var i in Sliders)
-            target.Draw(i);
+            if (i != null) target.Draw(i);
     }
 }
 
@@ -78,39 +61,25 @@ static class ButtonFactory
         var layout = new Layout
         {
             Buttons = new Sprite[4],
-            ButtonBoarders = new int[4][]
+            Sliders = new RectangleShape?[4]
         };
 
-        layout.Sliders = new[]
-        {
-            new RectangleShape
-            {
-                Size = new Vector2f(x * 0.5f, 3),
-                FillColor = Color.Green,
-                Position = new Vector2f(0.25f * x, y / 6f)
-            }
-        };
-
-        layout.SliderLevels = new[]
-        {
-            (int)(x * 0.5f)
+        layout.Sliders[0] = new RectangleShape
+        { 
+            Size = new Vector2f(x * 0.5f, 3), 
+            FillColor = Color.Green, 
+            Position = new Vector2f(0.25f * x, y / 6f)
         };
 
         for (var i = 0; i < 4; ++i)
         {
-            var x0 = (int)(x * 0.25f);
-            var y0 = (int)(y * (i + 1) / 6f);
-            var x1 = (int)(0.5f * x);
-            var y1 = (int)(0.15f * y);
-            
             layout.Buttons[i] = new Sprite
             {
                 Texture = Settings.MenuButton,
-                Scale = new Vector2f((float)x1 / Settings.MenuButton.Size.X,
-                    (float)y1 / Settings.MenuButton.Size.Y),
-                Position = new Vector2f(x0, y0)
+                Scale = new Vector2f((0.5f * x) / Settings.MenuButton.Size.X,
+                    (0.15f * y) / Settings.MenuButton.Size.Y),
+                Position = new Vector2f(x * 0.25f, y * (i + 1) / 6f)
             };
-            layout.ButtonBoarders[i] = new[] { x0, y0, x0 + x1, y0 + y1};
         }
 
         return layout;
@@ -121,7 +90,6 @@ static class ButtonFactory
         var layout = new Layout
         {
             Buttons = new Sprite[4],
-            ButtonBoarders = new int[4][]
         };
 
         return layout;

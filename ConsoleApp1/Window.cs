@@ -9,6 +9,8 @@ internal abstract class Window
 
     protected Layout? _layout;
 
+    protected bool IsMousePressed;
+
     public int Select { protected set; get; }
     
     protected Window()
@@ -22,18 +24,21 @@ internal abstract class Window
         _window.Closed += WindowClosed;
         _window.KeyReleased += WindowOnKeyReleased;
         _window.MouseMoved += WindowOnMouseMoved;
+        _window.MouseButtonPressed += WindowOnMouseButtonPressed;
         _window.MouseButtonReleased += WindowOnMouseButtonReleased;
     }
 
     public abstract void Loop();
 
     protected abstract void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e);
+    
+    protected abstract void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e);
 
     protected abstract void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e);
 
     protected abstract void WindowOnKeyReleased(object? sender, KeyEventArgs e);
     
-    protected /*virtual*/ void WindowClosed(object? sender, EventArgs e)
+    protected virtual void WindowClosed(object? sender, EventArgs e)
     {
         _window.Close();
     }
