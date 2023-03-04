@@ -1,6 +1,4 @@
-﻿using SFML.Audio;
-using SFML.Graphics;
-using SFML.System;
+﻿using SFML.Graphics;
 using SFML.Window;
 
 namespace ConsoleApp1;
@@ -16,62 +14,62 @@ internal class GameWindow : Window
     public GameWindow()
     {
         _board = new Board();
-        _sprite = new BoardSprite(_board, (int)_window.Size.X, (int)_window.Size.Y);
+        _sprite = new BoardSprite(_board, (int)SfWindow.Size.X, (int)SfWindow.Size.Y);
     }
 
     public override void Loop()
     {
-        while (_window.IsOpen)
+        while (IsOpen)
         {
-            _window.DispatchEvents();
+            SfWindow.DispatchEvents();
             
-            _window.Clear(Color.White);
-            _window.Draw(_sprite);
-            _window.Display();
+            SfWindow.Clear(Color.White);
+            SfWindow.Draw(_sprite);
+            SfWindow.Display();
         }
     }
 
-    protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
+    protected override void SfWindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
         _sprite.Selected = (e.X, e.Y);
     }
 
-    protected override void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
     {
         
     }
 
-    protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
         _board.PutStone();
     }
 
-    protected override void WindowOnKeyReleased(object? sender, KeyEventArgs e)
+    protected override void SfWindowOnKeyReleased(object? sender, KeyEventArgs e)
     {
         switch (e.Code)
         {
             case Keyboard.Key.Up:
                 --_iy;
                 if (_iy <= 0)
-                    _iy = Settings.DeskSize;
+                    _iy = Params.DeskSize;
                 break;
             case Keyboard.Key.Down:
                 ++_iy;
-                if (_iy > Settings.DeskSize)
+                if (_iy > Params.DeskSize)
                     _iy = 1;
                 break;
             case Keyboard.Key.Left:
                 --_ix;
                 if (_ix <= 0)
-                    _ix = Settings.DeskSize;
+                    _ix = Params.DeskSize;
                 break;
             case Keyboard.Key.Right:
                 ++_ix;
-                if (_ix > Settings.DeskSize)
+                if (_ix > Params.DeskSize)
                     _ix = 1;
                 break;
             case Keyboard.Key.Escape:
-                _window.Close();
+                IsOpen = false;
                 break;
         }
     }

@@ -6,40 +6,43 @@ namespace ConsoleApp1;
 
 internal class SettingsWindow : Window
 {
-    public SettingsWindow() {}
+    public SettingsWindow()
+    {
+        Layout = LayoutFactory.Settings(SfWindow.Size.X, SfWindow.Size.Y);
+    }
     
     public override void Loop()
     {
-        Settings.Ost.Play();
+        Params.Ost.Play();
 
-        while (_window.IsOpen)
+        while (IsOpen)
         {
-            _window.DispatchEvents();
+            SfWindow.DispatchEvents();
 
-            _window.Clear();
-            _window.Draw(_layout);
-            _window.Display();
+            SfWindow.Clear();
+            SfWindow.Draw(Layout);
+            SfWindow.Display();
         }
         
-        Settings.Ost.Stop();
+        Params.Ost.Stop();
     }
 
-    protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
+    protected override void SfWindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
         throw new NotImplementedException();
     }
 
-    protected override void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
     {
         throw new NotImplementedException();
     }
 
-    protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
         throw new NotImplementedException();
     }
 
-    protected override void WindowOnKeyReleased(object? sender, KeyEventArgs e)
+    protected override void SfWindowOnKeyReleased(object? sender, KeyEventArgs e)
     {
         throw new NotImplementedException();
     }

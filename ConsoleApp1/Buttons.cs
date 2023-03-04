@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace ConsoleApp1;
 
-class Layout: Drawable
+internal class ButtonLayout: Drawable
 {
     public Sprite[]? Buttons;
 
@@ -20,7 +20,6 @@ class Layout: Drawable
                 y < Buttons[i].Position.Y || y > (Buttons[i].Position.Y + Buttons[i].Texture.Size.Y * Buttons[i].Scale.Y)) 
                 continue;
             _selected = i;
-            Console.WriteLine(Buttons[i].Position);
             if (_selected == -1 || Sliders?[_selected] == null || !isPressed) return _selected;
             var scale = new Vector2f((x - Sliders[_selected]!.Position.X) / Sliders[_selected]!.Size.X, 1);
             scale.X = scale.X < 0 ? 0 : (scale.X > 1 ? 1 : scale.X);
@@ -54,11 +53,11 @@ class Layout: Drawable
     }
 }
 
-static class ButtonFactory
+internal static class LayoutFactory
 {
-    public static Layout MainMenu(float x, float y)
+    public static ButtonLayout MainMenu(float x, float y)
     {
-        var layout = new Layout
+        var layout = new ButtonLayout
         {
             Buttons = new Sprite[4],
             Sliders = new RectangleShape?[4]
@@ -75,9 +74,9 @@ static class ButtonFactory
         {
             layout.Buttons[i] = new Sprite
             {
-                Texture = Settings.MenuButton,
-                Scale = new Vector2f((0.5f * x) / Settings.MenuButton.Size.X,
-                    (0.15f * y) / Settings.MenuButton.Size.Y),
+                Texture = Params.MenuButton,
+                Scale = new Vector2f((0.5f * x) / Params.MenuButton.Size.X,
+                    (0.15f * y) / Params.MenuButton.Size.Y),
                 Position = new Vector2f(x * 0.25f, y * (i + 1) / 6f)
             };
         }
@@ -85,9 +84,9 @@ static class ButtonFactory
         return layout;
     }
 
-    public static Layout Setting(float x, float y)
+    public static ButtonLayout Settings(float x, float y)
     {
-        var layout = new Layout
+        var layout = new ButtonLayout
         {
             Buttons = new Sprite[4],
         };

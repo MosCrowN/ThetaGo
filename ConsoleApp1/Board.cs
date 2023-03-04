@@ -11,7 +11,7 @@ class Board
     
     public Board()
     {
-        var size = Settings.DeskSize + 2;
+        var size = Params.DeskSize + 2;
         Desk = new States[size, size];
         for (var i = 0; i < size; ++i)
         {
@@ -30,7 +30,7 @@ class Board
     public void PutStone(int ix = -1, int iy = -1)
     {
         if (ix == -1 || iy == -1) (ix, iy) = Selected;
-        if (ix < 0 || iy < 0 || ix > Settings.DeskSize || iy > Settings.DeskSize)
+        if (ix < 0 || iy < 0 || ix > Params.DeskSize || iy > Params.DeskSize)
             return;
 
         if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
@@ -67,8 +67,8 @@ class BoardSprite : Drawable
         {
             var ix = (int)Math.Round((value.ix - _sprite.Position.X - _shift) / _step);
             var iy = (int)Math.Round((value.iy - _sprite.Position.Y - _shift) / _step);
-            ix = ix >= Settings.DeskSize ? -1 : (ix < 0 ? -1 : ix);  
-            iy = iy >= Settings.DeskSize ? -1 : (iy < 0 ? -1 : iy);
+            ix = ix >= Params.DeskSize ? -1 : (ix < 0 ? -1 : ix);  
+            iy = iy >= Params.DeskSize ? -1 : (iy < 0 ? -1 : iy);
             Board.Selected = (ix, iy);
         }
         get => Board.Selected;
@@ -80,29 +80,29 @@ class BoardSprite : Drawable
 
         var min = Math.Min(screenX, screenY);
         var size = (int)(min * 5 / 6f);
-        _shift = _step = size / (Settings.DeskSize - 1);
+        _shift = _step = size / (Params.DeskSize - 1);
         var texture = new RenderTexture((uint)(size + 3 + 2 * _shift),
             (uint)(size + 3 + 2 * _shift));
         texture.Clear();
 
-        var bg = new Sprite(Settings.DeskBg);
-        bg.Scale = new Vector2f((float)texture.Size.X / Settings.DeskBg.Size.X,
-            (float)texture.Size.Y / Settings.DeskBg.Size.Y);
+        var bg = new Sprite(Params.DeskBg);
+        bg.Scale = new Vector2f((float)texture.Size.X / Params.DeskBg.Size.X,
+            (float)texture.Size.Y / Params.DeskBg.Size.Y);
         texture.Draw(bg);
 
         _lineH = new RectangleShape
         {
-            Size = new Vector2f((uint)(_step * (Settings.DeskSize - 1) + 3), 3),
+            Size = new Vector2f((uint)(_step * (Params.DeskSize - 1) + 3), 3),
             FillColor = Color.Black
         };
         
         _lineV = new RectangleShape
         {
-            Size = new Vector2f(3, (uint)(_step * (Settings.DeskSize - 1) + 3)),
+            Size = new Vector2f(3, (uint)(_step * (Params.DeskSize - 1) + 3)),
             FillColor = Color.Black
         };
 
-        for (var i = 0; i < Settings.DeskSize; ++i)
+        for (var i = 0; i < Params.DeskSize; ++i)
         {
             _lineH.Position = new Vector2f(_shift, i * _step + _shift);
             _lineV.Position = new Vector2f(i * _step + _shift, _shift);
@@ -114,12 +114,12 @@ class BoardSprite : Drawable
         _sprite = new Sprite(texture.Texture);
         _sprite.Position = new Vector2f((min - size) / 2f - _shift, (min - size) / 2f - _shift);
 
-        _black = new Sprite(Settings.BlackStone);
-        _black.Scale = new Vector2f((float)_step / Settings.BlackStone.Size.X,
-            (float)_step / Settings.BlackStone.Size.Y);
-        _white = new Sprite(Settings.WhiteStone);
-        _white.Scale = new Vector2f((float)_step / Settings.WhiteStone.Size.X,
-            (float)_step / Settings.WhiteStone.Size.Y);
+        _black = new Sprite(Params.BlackStone);
+        _black.Scale = new Vector2f((float)_step / Params.BlackStone.Size.X,
+            (float)_step / Params.BlackStone.Size.Y);
+        _white = new Sprite(Params.WhiteStone);
+        _white.Scale = new Vector2f((float)_step / Params.WhiteStone.Size.X,
+            (float)_step / Params.WhiteStone.Size.Y);
 
         _lineH.FillColor = Color.White;
         _lineV.FillColor = Color.White;
@@ -139,7 +139,7 @@ class BoardSprite : Drawable
             target.Draw(_lineV);
         }
 
-        var size = Settings.DeskSize - 1;
+        var size = Params.DeskSize - 1;
         for (var ix = 0; ix < size; ++ix)
         for (var iy = 0; iy < size; ++iy)
         {

@@ -8,64 +8,66 @@ internal class MainWindow : Window
 {
     public MainWindow()
     {
-        _layout = ButtonFactory.MainMenu(_window.Size.X, _window.Size.Y);
+        Layout = LayoutFactory.MainMenu(SfWindow.Size.X, SfWindow.Size.Y);
     }
     
     public override void Loop()
     {
-        var mainMenuBg = new Sprite(Settings.MenuBg);
-        mainMenuBg.Scale = new Vector2f(_window.Size.X / (float)mainMenuBg.Texture.Size.X,
-            _window.Size.Y / (float)mainMenuBg.Texture.Size.Y);
+        var mainMenuBg = new Sprite(Params.MenuBg);
+        mainMenuBg.Scale = new Vector2f(SfWindow.Size.X / (float)mainMenuBg.Texture.Size.X,
+            SfWindow.Size.Y / (float)mainMenuBg.Texture.Size.Y);
         
-        Settings.Ost.Play();
+        Params.Ost.Play();
 
-        while (_window.IsOpen)
+        while (IsOpen)
         {
-            _window.DispatchEvents();
+            SfWindow.DispatchEvents();
 
-            _window.Clear();
-            _window.Draw(mainMenuBg);
-            _window.Draw(_layout);
-            _window.Display();
+            SfWindow.Clear();
+            SfWindow.Draw(mainMenuBg);
+            SfWindow.Draw(Layout);
+            SfWindow.Display();
         }
         
-        Settings.Ost.Stop();
+        Params.Ost.Stop();
     }
 
-    protected override void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
+    protected override void SfWindowOnMouseMoved(object? sender, MouseMoveEventArgs e)
     {
-        if (_layout == null) return;
-        Select = _layout.Selected(e.X, e.Y, IsMousePressed);
+        if (Layout == null) return;
+        Select = Layout.Selected(e.X, e.Y, IsMousePressed);
     }
 
-    protected override void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
     {
         IsMousePressed = true;
-        if (_layout == null) return;
-        Select = _layout.Selected(e.X, e.Y, true);
+        if (Layout == null) return;
+        Select = Layout.Selected(e.X, e.Y, true);
     }
 
-    protected override void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
+    protected override void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
         IsMousePressed = false;
         if (e.Button != Mouse.Button.Left) return;
         switch (Select)
         {
             case 1:
-                _window.Close();
+                IsOpen = false;
                 break;
             case 3:
-                _window.Close();
+                IsOpen = false;
+                SfWindow.Close();
                 break;
         }
     }
 
-    protected override void WindowOnKeyReleased(object? sender, KeyEventArgs e)
+    protected override void SfWindowOnKeyReleased(object? sender, KeyEventArgs e)
     {
         switch (e.Code)
         {
             case Keyboard.Key.Escape:
-                _window.Close();
+                IsOpen = false;
+                SfWindow.Close();
                 break;
         }
     }

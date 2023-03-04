@@ -5,41 +5,60 @@ namespace ConsoleApp1;
 
 internal abstract class Window
 {
-    protected RenderWindow _window;
+    protected static readonly RenderWindow SfWindow = 
+        new (new VideoMode(), "Go", Styles.Fullscreen);
 
-    protected Layout? _layout;
+    protected ButtonLayout? Layout;
 
     protected bool IsMousePressed;
+
+    private bool _isOpen = true;
+
+    protected bool IsOpen
+    {
+        set => _isOpen = value;
+        get
+        {
+            if (_isOpen) return true;
+            SfWindow.KeyReleased -= SfWindowOnKeyReleased;
+            SfWindow.MouseMoved -= SfWindowOnMouseMoved;
+            SfWindow.MouseButtonPressed -= SfWindowOnMouseButtonPressed;
+            SfWindow.MouseButtonReleased -= SfWindowOnMouseButtonReleased;
+
+            return false;
+        }
+    }
 
     public int Select { protected set; get; }
     
     protected Window()
     {
         Select = -1;
-        
-        _window = new RenderWindow(new VideoMode(), "Go", Styles.Fullscreen);
-        _window.SetVerticalSyncEnabled(true);
-        _window.SetFramerateLimit(60);
 
-        _window.Closed += WindowClosed;
-        _window.KeyReleased += WindowOnKeyReleased;
-        _window.MouseMoved += WindowOnMouseMoved;
-        _window.MouseButtonPressed += WindowOnMouseButtonPressed;
-        _window.MouseButtonReleased += WindowOnMouseButtonReleased;
+        //TODO: window icon and settings
+        //SfWindow.SetIcon();
+        SfWindow.SetVerticalSyncEnabled(true);
+        SfWindow.SetFramerateLimit(60);
+
+        SfWindow.Closed += SfWindowClosed;
+        SfWindow.KeyReleased += SfWindowOnKeyReleased;
+        SfWindow.MouseMoved += SfWindowOnMouseMoved;
+        SfWindow.MouseButtonPressed += SfWindowOnMouseButtonPressed;
+        SfWindow.MouseButtonReleased += SfWindowOnMouseButtonReleased;
     }
 
     public abstract void Loop();
 
-    protected abstract void WindowOnMouseMoved(object? sender, MouseMoveEventArgs e);
+    protected abstract void SfWindowOnMouseMoved(object? sender, MouseMoveEventArgs e);
     
-    protected abstract void WindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e);
+    protected abstract void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e);
 
-    protected abstract void WindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e);
+    protected abstract void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e);
 
-    protected abstract void WindowOnKeyReleased(object? sender, KeyEventArgs e);
+    protected abstract void SfWindowOnKeyReleased(object? sender, KeyEventArgs e);
     
-    protected virtual void WindowClosed(object? sender, EventArgs e)
+    private static void SfWindowClosed(object? sender, EventArgs e)
     {
-        _window.Close();
+        SfWindow.Close();
     }
 }
