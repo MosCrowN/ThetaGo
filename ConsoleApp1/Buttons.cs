@@ -46,13 +46,13 @@ internal class ButtonLayout: Drawable
         return _selected;
     }
 
-    public float Slider
+    public int Slider
     {
         get
         {
             if (_selected < 0 || Buttons?[_selected].R! == null)
                 return -1;
-            return Buttons[_selected].R!.Scale.X;
+            return (int)(100 * Buttons[_selected].R!.Scale.X);
         }
     }
 
@@ -120,6 +120,9 @@ internal static class LayoutFactory
                 Position = new Vector2f(layout.Buttons[i].S!.Position.X,
                     layout.Buttons[i].S!.Position.Y + 0.0625f * y)
             };
+        
+        layout.Buttons[0].R!.Scale = new Vector2f(Params.MusicVolume / 100f, 1);
+        layout.Buttons[1].R!.Scale = new Vector2f(Params.DeskSize / 35f,1);
 
         return layout;
     }

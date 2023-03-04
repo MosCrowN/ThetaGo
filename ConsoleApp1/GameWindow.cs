@@ -5,9 +5,9 @@ namespace ConsoleApp1;
 
 internal class GameWindow : Window
 {
-    private Board _board;
+    private readonly Board _board;
 
-    private BoardSprite _sprite;
+    private readonly BoardSprite _sprite;
 
     private int _ix, _iy;
 

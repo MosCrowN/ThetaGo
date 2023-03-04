@@ -3,9 +3,9 @@ using SFML.System;
 
 namespace ConsoleApp1;
 
-class Board
+internal class Board
 {
-    public States[,] Desk;
+    public readonly States[,] Desk;
 
     public static (int ix, int iy) Selected;
     
@@ -51,15 +51,15 @@ class Board
     }
 }
 
-class BoardSprite : Drawable
+internal class BoardSprite : Drawable
 {
-    private int _step, _shift;
+    private readonly int _step, _shift;
     
-    private Sprite _sprite, _black, _white;
+    private readonly Sprite _sprite, _black, _white;
 
-    private RectangleShape _lineH, _lineV;
+    private readonly RectangleShape _lineH, _lineV;
 
-    private Board.States[,] _desk;
+    private readonly Board.States[,] _desk;
     
     public (int ix, int iy) Selected
     {
@@ -139,7 +139,7 @@ class BoardSprite : Drawable
             target.Draw(_lineV);
         }
 
-        var size = Params.DeskSize - 1;
+        var size = Params.DeskSize;
         for (var ix = 0; ix < size; ++ix)
         for (var iy = 0; iy < size; ++iy)
         {

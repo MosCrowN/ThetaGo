@@ -1,6 +1,4 @@
-﻿using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
+﻿using SFML.Window;
 
 namespace ConsoleApp1;
 
@@ -31,11 +29,14 @@ internal class SettingsWindow : Window
     {
         if (Layout == null) return;
         Select = Layout.Selected(e.X, e.Y, IsMousePressed);
+        if (!IsMousePressed || Select != 0) return;
+        Params.MusicVolume = Layout!.Slider;
+        Params.Ost.Volume = Params.MusicVolume;
     }
 
     protected override void SfWindowOnMouseButtonPressed(object? sender, MouseButtonEventArgs e)
     {
-        IsMousePressed = true;
+        if (e.Button == Mouse.Button.Left) IsMousePressed = true;
         if (Layout == null) return;
         Select = Layout.Selected(e.X, e.Y, true);
     }
@@ -46,6 +47,13 @@ internal class SettingsWindow : Window
         if (e.Button != Mouse.Button.Left) return;
         switch (Select)
         {
+            case 0:
+                Params.MusicVolume = Layout!.Slider;
+                Params.Ost.Volume = Params.MusicVolume;
+                break;
+            case 1:
+                Params.DeskSize = Layout!.Slider; 
+                break;
             case 4:
                 IsOpen = false;
                 break;
