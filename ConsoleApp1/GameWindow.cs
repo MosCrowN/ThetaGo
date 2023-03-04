@@ -9,8 +9,6 @@ internal class GameWindow : Window
 
     private readonly BoardSprite _sprite;
 
-    private int _ix, _iy;
-
     public GameWindow()
     {
         _board = new Board();
@@ -48,26 +46,6 @@ internal class GameWindow : Window
     {
         switch (e.Code)
         {
-            case Keyboard.Key.Up:
-                --_iy;
-                if (_iy <= 0)
-                    _iy = Params.DeskSize;
-                break;
-            case Keyboard.Key.Down:
-                ++_iy;
-                if (_iy > Params.DeskSize)
-                    _iy = 1;
-                break;
-            case Keyboard.Key.Left:
-                --_ix;
-                if (_ix <= 0)
-                    _ix = Params.DeskSize;
-                break;
-            case Keyboard.Key.Right:
-                ++_ix;
-                if (_ix > Params.DeskSize)
-                    _ix = 1;
-                break;
             case Keyboard.Key.Escape:
                 IsOpen = false;
                 break;

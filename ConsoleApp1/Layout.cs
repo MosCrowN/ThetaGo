@@ -129,7 +129,7 @@ internal static class LayoutFactory
                 layout.Buttons[i].S!.GetGlobalBounds().Height);
             var oldTextSize = new Vector2f(layout.Buttons[i].T!.GetGlobalBounds().Width,
                 layout.Buttons[i].T!.GetGlobalBounds().Height);
-            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length / 25f * size.X, 0.33f * size.Y);
+            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length * (size.X / 25f), 0.33f * size.Y);
             layout.Buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
             layout.Buttons[i].T!.Position = layout.Buttons[i].S!.Position + (size - newTextSize) / 2f;
         }
@@ -163,7 +163,6 @@ internal static class LayoutFactory
         {
             layout.Buttons[i] = new Button
             {
-
                 S = new Sprite
                 {
                     Texture = Params.MenuButton,
@@ -184,7 +183,7 @@ internal static class LayoutFactory
                 layout.Buttons[i].S!.GetGlobalBounds().Height);
             var oldTextSize = new Vector2f(layout.Buttons[i].T!.GetGlobalBounds().Width,
                 layout.Buttons[i].T!.GetGlobalBounds().Height);
-            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length / 25f * size.X, 0.33f * size.Y);
+            var newTextSize = new Vector2f(layout.Buttons[i].T!.DisplayedString.Length * (size.X / 25f), 0.33f * size.Y);
             layout.Buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
             layout.Buttons[i].T!.Position = layout.Buttons[i].S!.Position + (size - newTextSize) / 2f;
         }
