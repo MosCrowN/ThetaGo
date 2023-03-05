@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using System.Diagnostics;
+using SFML.Graphics;
 using SFML.System;
 
 namespace ConsoleApp1;
@@ -9,7 +10,7 @@ internal class Board
 
     public static (int ix, int iy) Selected;
     
-    public Board()
+    public Board(IArbiter? arbiter = null)
     {
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
@@ -23,23 +24,56 @@ internal class Board
             Desk[0, i] = States.Edge;
             Desk[size - 1, i] = States.Edge;
         }
+
+        _arbiter = arbiter;
+        _isWhite = false;
     }
+    
+    private IArbiter? _arbiter;
 
     private static bool _isWhite;
+
+    private static States[,]? 
+        _desk1 = new States[1, 1],
+        _desk2 = new States[1, 1];
     
     public void PutStone(int ix = -1, int iy = -1)
     {
+        /*/
+        Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start(); // */
+
         if (ix == -1 || iy == -1) (ix, iy) = Selected;
         if (ix < 0 || iy < 0 || ix > Params.DeskSize || iy > Params.DeskSize)
             return;
-
+        
+        if (Desk[ix + 1, iy + 1] != States.Free) return;
+        
         if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
         else Desk[ix + 1, iy + 1] = States.Black;
         _isWhite = !_isWhite;
-
-        //TODO: check Ko rule
+        
         //TODO: check if the stone surrounded
         //TODO: paint previous stone
+
+        if (Equals(_desk2, Desk))
+        {
+            _isWhite = !_isWhite;
+            Desk[ix + 1, iy + 1] = States.Free;
+        }
+        else
+        {
+            _desk2 = _desk1!.Clone() as States[,];
+            _desk1 = Desk.Clone() as States[,];
+        }
+        
+        /*/
+        stopWatch.Stop();
+        TimeSpan ts = stopWatch.Elapsed;
+        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds);
+        Console.WriteLine("RunTime " + elapsedTime); // */
     }
 
     public enum States : sbyte
