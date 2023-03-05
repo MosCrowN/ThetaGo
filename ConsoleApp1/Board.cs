@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿//using System.Diagnostics;
 using SFML.Graphics;
 using SFML.System;
 
@@ -36,14 +36,14 @@ internal class Board
     private static States[,]? 
         _desk1 = new States[1, 1],
         _desk2 = new States[1, 1];
-    
-    public void PutStone(int ix = -1, int iy = -1)
+
+    public void PutStone(int ix = -1000, int iy = -1000)
     {
         /*/
         Stopwatch stopWatch = new Stopwatch();
         stopWatch.Start(); // */
 
-        if (ix == -1 || iy == -1) (ix, iy) = Selected;
+        if (ix == -1000 || iy == -1000) (ix, iy) = Selected;
         if (ix < 0 || iy < 0 || ix > Params.DeskSize || iy > Params.DeskSize)
             return;
         
@@ -78,10 +78,13 @@ internal class Board
 
     public enum States : sbyte
     {
-        White = 1,
-        Black = -1,
-        Free = 0,
-        Edge = 2,
+        White,
+        Black,
+        Free,
+        Edge,
+        Visited,
+        CapturedWhite,
+        CapturedBlack
     }
 }
 
