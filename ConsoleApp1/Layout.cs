@@ -89,10 +89,10 @@ internal static class LayoutFactory
     {
         return n switch
         {
-            0 => "Load game",
-            1 => "New game",
-            2 => "Settings",
-            3 => "Exit",
+            0 => "CONTINUE",
+            1 => "NEW GAME",
+            2 => "SETTINGS",
+            3 => "EXIT",
             _ => ""
         };
     }
@@ -141,11 +141,11 @@ internal static class LayoutFactory
     {
         return n switch
         {
-            0 => "Music volume: 100",
-            1 => "Desk size: 19",
-            2 => "Difficulty: 10",
-            3 => "Multiplayer",
-            4 => "Save & Back",
+            0 => "MUSIC VOLUME: 100",
+            1 => "DESK SIZE: 19",
+            2 => "DIFFICULTY: 10",
+            3 => "MULTIPLAYER",
+            4 => "SAVE & BACK",
             _ => ""
         };
     }

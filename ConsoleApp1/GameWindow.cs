@@ -11,7 +11,7 @@ internal class GameWindow : Window
 
     public GameWindow()
     {
-        _board = new Board();
+        _board = new Board(new IngRulesDfs());
         _sprite = new BoardSprite(_board, (int)SfWindow.Size.X, (int)SfWindow.Size.Y);
     }
 

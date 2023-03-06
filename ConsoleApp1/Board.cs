@@ -6,7 +6,7 @@ namespace ConsoleApp1;
 
 internal class Board
 {
-    public readonly States[,] Desk;
+    public States[,] Desk;
 
     public static (int ix, int iy) Selected;
     
@@ -53,13 +53,15 @@ internal class Board
         else Desk[ix + 1, iy + 1] = States.Black;
         _isWhite = !_isWhite;
         
+        //TODO: fix Ko rule
         //TODO: check if the stone surrounded
         //TODO: paint previous stone
 
         if (Equals(_desk2, Desk))
         {
             _isWhite = !_isWhite;
-            Desk[ix + 1, iy + 1] = States.Free;
+            Desk[ix + 1, iy + 1] = States.Free; 
+            return;
         }
         else
         {
@@ -67,7 +69,14 @@ internal class Board
             _desk1 = Desk.Clone() as States[,];
         }
         
-        //TODO: check 4 near stones
+        //check 4 near stones
+        if (_arbiter == null) return;
+        _arbiter!.Capture(ref Desk,ix, iy + 1);
+        _arbiter!.Capture(ref Desk,ix + 1, iy);
+        _arbiter!.Capture(ref Desk,ix + 2, iy + 1);
+        _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
+        
+        _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
         
         /*/
         stopWatch.Stop();

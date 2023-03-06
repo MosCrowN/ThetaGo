@@ -113,6 +113,28 @@ internal class OutputNeuron : Neuron
     public override void Clear()
     {
         OutputValue = 0;
-        base.Clear();
+        Value = 0;
+        ThFunction = 0;
+        Gradient = 0;
     } 
+}
+
+internal static class NetworkFactory
+{
+    public static (Neuron[] input, Neuron[] output) NetworkCreate(int[] layers)
+    {
+        var num = layers.Length;
+        var neurons = new Neuron[num][];
+        
+        neurons[0] = new Neuron[layers[0]];
+        for (var i = 0; i < layers[0]; ++i)
+            neurons[0][i] = new InputNeuron();
+        neurons[num - 1] = new Neuron[layers[num - 1]];
+        for (int i = 0; i < layers[num - 1]; ++i)
+            neurons[num - 1][i] = new OutputNeuron();
+        
+        
+        
+        return (neurons[0], neurons[num - 1]);
+    }
 }

@@ -1,3 +1,7 @@
+using ConsoleApp1;
+
+using ConsoleApp2;
+
 namespace TestProject1;
 
 [TestClass]

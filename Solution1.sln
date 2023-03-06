@@ -1,8 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{E07CDD0C-3C88-43BD-892D-8310AED978C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A22F72D-D4ED-4857-B5F3-F6C7E5F6AF37} = {6A22F72D-D4ED-4857-B5F3-F6C7E5F6AF37}
+		{7D437FE9-1D98-43CC-9B4D-EB12134C1623} = {7D437FE9-1D98-43CC-9B4D-EB12134C1623}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject1", "TestProject1\TestProject1.csproj", "{7D437FE9-1D98-43CC-9B4D-EB12134C1623}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A22F72D-D4ED-4857-B5F3-F6C7E5F6AF37} = {6A22F72D-D4ED-4857-B5F3-F6C7E5F6AF37}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{6A22F72D-D4ED-4857-B5F3-F6C7E5F6AF37}"
 EndProject
