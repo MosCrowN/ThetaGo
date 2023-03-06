@@ -67,6 +67,8 @@ internal class Board
             _desk1 = Desk.Clone() as States[,];
         }
         
+        //TODO: check 4 near stones
+        
         /*/
         stopWatch.Stop();
         TimeSpan ts = stopWatch.Elapsed;
@@ -82,9 +84,7 @@ internal class Board
         Black,
         Free,
         Edge,
-        Visited,
-        CapturedWhite,
-        CapturedBlack
+        Visited
     }
 }
 
