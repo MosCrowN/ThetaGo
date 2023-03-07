@@ -8,12 +8,16 @@ internal class Board
 {
     public States[,] Desk;
 
+    private States[,] _desk1, _desk2;
+
     public static (int ix, int iy) Selected;
     
     public Board(IArbiter? arbiter = null)
     {
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
+        _desk1 = new States[size, size];
+        _desk2 = new States[size, size];
         for (var i = 0; i < size; ++i)
         for (var j = 0; j < size; ++j)
                 Desk[i, j] = States.Free;
@@ -32,10 +36,6 @@ internal class Board
     private IArbiter? _arbiter;
 
     private static bool _isWhite;
-
-    private static States[,]? 
-        _desk1 = new States[1, 1],
-        _desk2 = new States[1, 1];
 
     public void PutStone(int ix = -1000, int iy = -1000)
     {
@@ -57,17 +57,7 @@ internal class Board
         //TODO: check if the stone surrounded
         //TODO: paint previous stone
 
-        if (Equals(_desk2, Desk))
-        {
-            _isWhite = !_isWhite;
-            Desk[ix + 1, iy + 1] = States.Free; 
-            return;
-        }
-        else
-        {
-            _desk2 = _desk1!.Clone() as States[,];
-            _desk1 = Desk.Clone() as States[,];
-        }
+        if (KoCheck(ix + 1, iy + 1)) return;
         
         //check 4 near stones
         if (_arbiter == null) return;
@@ -84,6 +74,26 @@ internal class Board
             ts.Hours, ts.Minutes, ts.Seconds,
             ts.Milliseconds);
         Console.WriteLine("RunTime " + elapsedTime); // */
+    }
+
+    private bool KoCheck(int x, int y)
+    {
+        for (var i = 0; i < Params.DeskSize + 2; ++i)
+        for (var j = 0; j < Params.DeskSize + 2; ++j)
+            if (_desk1[i, j] != Desk[i, j])
+            {
+                for (var ix = 0; ix < Params.DeskSize + 2; ++ix)
+                for (var iy = 0; iy < Params.DeskSize + 2; ++iy)
+                {
+                    _desk1[ix, iy] = Desk[ix, iy];
+                }
+
+                return false;
+            }
+
+        _isWhite = !_isWhite;
+        Desk[x, y] = States.Free;
+        return true;
     }
 
     public enum States : sbyte
