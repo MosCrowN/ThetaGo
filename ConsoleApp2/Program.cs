@@ -2,139 +2,124 @@
 
 internal static class DMath
 {
+    public static decimal Exp(decimal x)
+    {
+        decimal ans = 1, pow = x, n = 1, i = 1;
+        do
+        {
+            n /= i;
+            ans += pow * n;
+            pow *= x;
+            ++i;
+        } while (n > 0);
+
+        return ans;
+    }
+    
+    public delegate decimal FuncDel(decimal v);
+    
+    public static FuncDel FuncList(string name)
+    {
+        return name switch
+        {
+            "logistic" => v => 1 / (1 + Exp(v)),
+            "ReLu" => v => v > 0 ? v : 0,
+            _ => v => v
+        };
+    }
+
+    public static FuncDel DiffList(string name)
+    {
+        return name switch
+        {
+            "logistic" => v => v * (1 - v),
+            "ReLu" => v => v > 0 ? 1 : 0,
+            _ => v => 1
+        }; 
+    }
     private static void Main()
     {
         Console.WriteLine(Math.Exp(5d));
+        Console.WriteLine(Exp(5M));
     }
 }
 
-internal interface INeuron
+class Neuron
 {
-    public double Value { set; get; }
-    
-    public double ThFunction { set; get; }
-    
-    public void DirectPropagation();
+    //weighted summ value, function activation value and local gradient
+    public decimal V, F, G; 
+    //function activation and differencial
+    private DMath.FuncDel _func, _diff;
 
-    public void BackPropagation();
-
-    public void Clear();
-}
-
-internal class Synapse
-{
-    public double Weight; //weight
-
-    public INeuron InputNeuron; //input
-
-    public INeuron OutputNeuron; //output
-}
-
-internal class Neuron: INeuron
-{
-    public double Value { get; set; } //value
-
-    public double ThFunction { set; get; } //function
-
-    public double Gradient; //gradient
-
-    public Synapse[]? InputSynapses; //input
-
-    public Synapse[]? OutputSynapses; //output
-
-    public (INeuron? prev, INeuron? next) NearNeurons; //nearest previous & next 
-
-    public static double Step; //step
-    
-    public virtual void DirectPropagation() //Right
+    public Neuron(DMath.FuncDel func, DMath.FuncDel diff)
     {
-        ThFunction = 2 / (1 + Math.Exp(Value)) - 1;
-        for (var i = 0; i < OutputSynapses!.Length; ++i)
-            OutputSynapses[i].OutputNeuron.Value += ThFunction * OutputSynapses[i].Weight;
-        Value = 0;
-        NearNeurons.next?.DirectPropagation();
+        V = F = G = 0;
+        _func = func;
+        _diff = diff;
     }
-    
-    public virtual void BackPropagation() //Back
+
+    public void Activate()
     {
-        Gradient = Value * 0.5 * (1 + ThFunction) * (1 - ThFunction);
-        for (var i = 0; i < InputSynapses!.Length; ++i)
-        { 
-            InputSynapses[i].Weight -= Step * Gradient * InputSynapses[i].InputNeuron.ThFunction;
-            InputSynapses[i].InputNeuron.Value += Gradient * InputSynapses[i].Weight;
+        F = _func(V);
+    }
+}
+
+class NeuralNetwork
+{
+    private Neuron[][] _neur;
+    //weights of synapses
+    private decimal[][,] _w;
+
+    public NeuralNetwork(int[] layers, string[][] fAct, decimal[][,]? w = null)
+    {
+        //remember about the bias!!!
+        _neur = new Neuron[layers.Length][];
+        _w = new decimal[layers.Length - 1][,];
+
+        for (var layerNum = 0; layerNum < layers.Length; ++layerNum)
+        {
+            _neur[layerNum] = new Neuron[layers[layerNum] + 1];
+            for (var neuronNum = 0; neuronNum < layers[layerNum]; ++neuronNum)
+                _neur[layerNum][neuronNum] = new Neuron(
+                    DMath.FuncList(fAct[layerNum][neuronNum]),
+                    DMath.DiffList(fAct[layerNum][neuronNum]));
+            _neur[layerNum][layers[layerNum]] = 
+                new Neuron(v => 1, v => 0);
         }
-        NearNeurons.prev?.BackPropagation();
-    }
-    
-    public virtual void Clear()
-    {
-        Value = 0;
-        ThFunction = 0;
-        Gradient = 0;
-        NearNeurons.next?.Clear();
-    }
-}
 
-internal class InputNeuron: Neuron
-{
-    public double InputValue;
-    
-    public override void DirectPropagation()
-    {
-        ThFunction = Value;
-        for (var i = 0; i < OutputSynapses!.Length; ++i)
-            OutputSynapses[i].OutputNeuron.Value += ThFunction * OutputSynapses[i].Weight;
-        Value = 0;
-        NearNeurons.next?.DirectPropagation();
-    }
-
-    public override void Clear()
-    {
-        InputValue = 0;
-        base.Clear();
-    } 
-}
-
-internal class OutputNeuron : Neuron
-{
-    public double OutputValue;
-
-    public override void BackPropagation()
-    {
-        Gradient = Value - OutputValue;
-        for (var i = 0; i < InputSynapses!.Length; ++i)
-        { 
-            InputSynapses[i].Weight -= Step * Gradient * InputSynapses[i].InputNeuron.ThFunction;
-            InputSynapses[i].InputNeuron.Value += Gradient * InputSynapses[i].Weight;
+        for (var synapseLayer = 0; synapseLayer < layers.Length - 1; ++synapseLayer)
+        {
+            _w[synapseLayer] = new decimal[layers[synapseLayer] + 1, layers[synapseLayer + 1]];
+            for (var input = 0; input <= layers[synapseLayer]; ++input)
+            for (var output = 0; output < layers[synapseLayer + 1]; ++output)
+                _w[synapseLayer][input, output] = w == null ? 
+                    0 : w[synapseLayer][input, output];
+            //TODO: bias neurons weight
         }
-        NearNeurons.prev?.BackPropagation();
     }
-    
-    public override void Clear()
+
+    public decimal[] Count(decimal[] data)
     {
-        OutputValue = 0;
-        Value = 0;
-        ThFunction = 0;
-        Gradient = 0;
-    } 
+        if (data.Length != _neur[0].Length)
+            return new[] { 0M };
+        
+        for (var i = 0; i < _neur[0].Length; ++i)
+            _neur[0][i].V = data[i];
+        
+        for (var layerNum = 1; layerNum < _neur.Length; ++layerNum)
+        for (var receiver = 0; receiver < _neur[layerNum].Length; ++receiver)
+            {
+                for (var sender = 0; sender < _neur[layerNum - 1].Length; ++layerNum)
+                    _neur[layerNum][receiver].V += _neur[layerNum - 1][sender].F *
+                                                   _w[layerNum - 1][sender, receiver];
+                _neur[layerNum][receiver].Activate();
+            }
+
+        var ans = new decimal[_neur[^1].Length];
+        for (var i = 0; i < ans.Length; ++i)
+            ans[i] = _neur[^1][i].F;
+
+        return ans;
+    }
 }
 
-internal static class NetworkFactory
-{
-    public static (Neuron[] input, Neuron[] output) NetworkCreate(int[] layers)
-    {
-        var num = layers.Length;
-        var neurons = new Neuron[num][];
-        
-        neurons[0] = new Neuron[layers[0]];
-        for (var i = 0; i < layers[0]; ++i)
-            neurons[0][i] = new InputNeuron();
-        neurons[num - 1] = new Neuron[layers[num - 1]];
-        for (int i = 0; i < layers[num - 1]; ++i)
-            neurons[num - 1][i] = new OutputNeuron();
-        
-        
-        
-        return (neurons[0], neurons[num - 1]);
-    }
-}
