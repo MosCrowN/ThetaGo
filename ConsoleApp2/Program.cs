@@ -1,19 +1,76 @@
-﻿namespace ConsoleApp2;
+﻿using MNIST.IO;
+
+namespace ConsoleApp2;
+
+internal class Test
+{
+    private static Random _r = new ();
+    
+    private static byte[] _labels = new byte[60000];
+    private static decimal[][] _images = new decimal[60000][];
+
+    private static void PrepareData()
+    {
+        var data = FileReaderMNIST.LoadImagesAndLables(
+            "data/train-labels-idx1-ubyte.gz",
+            "data/train-images-idx3-ubyte.gz");
+        var i = 0;
+        foreach (var t in data)
+        {
+            _labels[i] = t.Label;
+            _images[i] = new decimal[784];
+            for (var j = 0; j < 28; ++j)
+            for (var k = 0; k < 28; ++k)
+                _images[i][j * k] = t.Image[j, k];
+            
+            if (++i % 6000 != 0) continue;
+            Console.Write("Data prepare is ready for ");
+            Console.Write(i / 600);
+            Console.WriteLine("%");
+        }
+    }
+    private static void Main()
+    { 
+        PrepareData();
+
+       var net = new NeuralNetwork(new[] { 784, 800, 10 }, new[] { "", "logistic", "logistic" });
+       decimal loss;
+       do
+       {
+           net.Count(_images[_r.Next(0, 59999)]);
+           var exp = new decimal[10];
+           exp[_labels[_r.Next(0, 59999)]] = 1;
+           net.Train(exp);
+           loss = net.Loss();
+           Console.WriteLine(loss);
+       } while (true);
+    }
+}
 
 //Dm - decimal math
 internal static class Dm
 {
+    private static Random _r = new ();
+    //R - random
+    public static decimal R(decimal maxAbs = 1)
+    {
+        maxAbs = maxAbs <= 1 ? Convert.ToDecimal(_r.NextDouble()) :
+            Convert.ToDecimal(_r.Next()) % maxAbs;
+        if (_r.Next() % 2 == 0) maxAbs *= -1;
+        return maxAbs;
+    }
+    
     //E - exponent
     public static decimal E(decimal x)
     {
-        decimal ans = 1, pow = x, n = 1, i = 1;
+        if (x > 64) return 0;
+        decimal ans = 1, pow = x, i = 1;
         do
         {
-            n /= i;
-            ans += pow * n;
-            pow *= x;
             ++i;
-        } while (n > 0);
+            ans += pow;
+            pow *= x / i;
+        } while (pow > 0);
 
         return ans;
     }
@@ -42,11 +99,6 @@ internal static class Dm
             _ => _ => 1
         }; 
     }
-    private static void Main()
-    {
-        Console.WriteLine(Math.Exp(5d));
-        Console.WriteLine(E(5M));
-    }
 }
 
 class Neuron
@@ -72,7 +124,7 @@ class NeuralNetwork
     private decimal[][,] _w;
 
     //l - layers num and struct, f - activation functions, w - weights
-    public NeuralNetwork(int[] l, string[][] f, decimal[][,]? w = null)
+    public NeuralNetwork(int[] l, string[] f, decimal[][,]? w = null)
     {
         _n = new Neuron[l.Length][];
         _w = new decimal[l.Length - 1][,];
@@ -82,8 +134,8 @@ class NeuralNetwork
         {
             _n[iL] = new Neuron[l[iL] + 1];
             for (var iN = 0; iN < l[iL]; ++iN)
-                _n[iL][iN] = new Neuron(Dm.Fl(f[iL][iN]), Dm.Dl(f[iL][iN]));
-            _n[iL][l[iL]] = new Neuron(_ => 1, _ => 0);
+                _n[iL][iN] = new Neuron(Dm.Fl(f[iL]), Dm.Dl(f[iL]));
+            _n[iL][l[iL]] = new Neuron(_ => 1M, _ => 0);
         }
         
         //iSl - iSynapse layer, iI - iInput, iO - iOutput, iB - iBias
@@ -92,29 +144,32 @@ class NeuralNetwork
             _w[iSl] = new decimal[l[iSl] + 1, l[iSl + 1]];
             for (var iI = 0; iI < l[iSl]; ++iI)
             for (var iO = 0; iO < l[iSl + 1]; ++iO)
-                _w[iSl][iI, iO] = w == null ? 0 : w[iSl][iI, iO];
+                _w[iSl][iI, iO] = w == null ? Dm.R() : w[iSl][iI, iO];
             for (var iB = 0; iB < l[iSl + 1]; ++iB)
-                _w[iSl][l[iSl], iB] = w == null ? 0 : w[iSl][l[iSl], iB];
-            //TODO: bias neurons weight
+                _w[iSl][l[iSl], iB] = w == null ? Dm.R(10) : w[iSl][l[iSl], iB];
         }
     }
     
     public decimal[] Count(decimal[] data)
     {
-        if (data.Length != _n[0].Length)
+        if (data.Length != _n[0].Length - 1)
             return new[] { 0M };
 
-        for (var i = 0; i < _n[0].Length; ++i)
+        for (var i = 0; i < _n[0].Length - 1; ++i)
             _n[0][i].F = _n[0][i].V = data[i];
 
         //iL - iLayer num, iR - iReceiver, iS - iSender
         for (var iL = 1; iL < _n.Length; ++iL)
-        for (var iR = 0; iR < _n[iL].Length - 1; ++iR)
         {
-            _n[iL][iR].V = 0;
-            for (var iS = 0; iS < _n[iL - 1].Length; ++iL)
-                _n[iL][iR].V += _n[iL - 1][iS].F * _w[iL - 1][iS, iR];
-            _n[iL][iR].F = _n[iL][iR].A(_n[iL][iR].V);
+            for (var iR = 0; iR < _n[iL].Length - 1; ++iR)
+            {
+                _n[iL][iR].V = 0;
+                for (var iS = 0; iS < _n[iL - 1].Length; ++iS)
+                    _n[iL][iR].V += _n[iL - 1][iS].F * _w[iL - 1][iS, iR];
+                _n[iL][iR].F = _n[iL][iR].A(_n[iL][iR].V);
+            }
+
+            _n[iL][^1].F = 1;
         }
 
         var ans = new decimal[_n[^1].Length];
@@ -128,23 +183,25 @@ class NeuralNetwork
     
     public void Train(decimal[] data)
     {
-        if (data.Length != _n[^1].Length)
+        if (data.Length != _n[^1].Length - 1)
             return;
 
-        for (var i = 0; i < _n[^1].Length; ++i)
+        for (var i = 0; i < _n[^1].Length - 1; ++i)
             _n[^1][i].G = _n[^1][i].F - data[i];
 
         //iL - iLayer num, iR - iReceiver, iS - iSender
         for (var iL = _n.Length - 1; iL > 0; --iL)
         for (var iR = 0; iR < _n[iL - 1].Length; ++iR)
         {
-            _n[iL][iR].V = 0;
-            for (var iS = 0; iS < _n[iL].Length - 1; ++iL)
+            _n[iL - 1][iR].V = 0;
+            for (var iS = 0; iS < _n[iL].Length - 1; ++iS)
             {
-                _w[iL - 1][iS, iR] -= _dy * _n[iL][iS].G * _n[iL][iS].F;
-                _n[iL][iR].V += _n[iL - 1][iS].G * _w[iL - 1][iS, iR];
+                _w[iL - 1][iR, iS] -= _dy * _n[iL][iS].G * _n[iL][iS].F;
+                _n[iL - 1][iR].V += _n[iL][iS].G * _w[iL - 1][iR, iS];
             }
-            _n[iL][iR].G = _n[iL][iR].V * _n[iL][iR].D(_n[iL][iR].F);
+            _n[iL - 1][iR].G = _n[iL - 1][iR].V * _n[iL - 1][iR].D(_n[iL - 1][iR].F);
         }
     }
+
+    public decimal Loss() =>  _n[^1].Sum(n => n.G * n.G / _n[^1].Length - 1);
 }
