@@ -15,10 +15,10 @@ internal class Board
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
         for (var i = 0; i < size; ++i)
-        {
-            for (var j = 0; j < size; ++j)
+        for (var j = 0; j < size; ++j)
                 Desk[i, j] = States.Free;
-
+        for (var i = 0; i < size; ++i)
+        {
             Desk[i, 0] = States.Edge;
             Desk[i, size - 1] = States.Edge;
             Desk[0, i] = States.Edge;
@@ -73,9 +73,8 @@ internal class Board
         if (_arbiter == null) return;
         _arbiter!.Capture(ref Desk,ix, iy + 1);
         _arbiter!.Capture(ref Desk,ix + 1, iy);
-        _arbiter!.Capture(ref Desk,ix + 2, iy + 1);
+        _arbiter!.Capture(ref Desk,ix + 2, iy + 1); 
         _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
-        
         _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
         
         /*/
