@@ -1,8 +1,10 @@
 ﻿namespace ConsoleApp2;
 
-internal static class DMath
+//Dm - decimal math
+internal static class Dm
 {
-    public static decimal Exp(decimal x)
+    //E - exponent
+    public static decimal E(decimal x)
     {
         decimal ans = 1, pow = x, n = 1, i = 1;
         do
@@ -16,110 +18,133 @@ internal static class DMath
         return ans;
     }
     
-    public delegate decimal FuncDel(decimal v);
+    //Fd - Function delegate
+    public delegate decimal Fd(decimal v);
     
-    public static FuncDel FuncList(string name)
+    //Fl - activation Functions list
+    public static Fd Fl(string name)
     {
         return name switch
         {
-            "logistic" => v => 1 / (1 + Exp(v)),
+            "logistic" => v => 1 / (1 + E(v)),
             "ReLu" => v => v > 0 ? v : 0,
             _ => v => v
         };
     }
 
-    public static FuncDel DiffList(string name)
+    //Dl - activation function Differentials list
+    public static Fd Dl(string name)
     {
         return name switch
         {
             "logistic" => v => v * (1 - v),
             "ReLu" => v => v > 0 ? 1 : 0,
-            _ => v => 1
+            _ => _ => 1
         }; 
     }
     private static void Main()
     {
         Console.WriteLine(Math.Exp(5d));
-        Console.WriteLine(Exp(5M));
+        Console.WriteLine(E(5M));
     }
 }
 
 class Neuron
 {
-    //weighted summ value, function activation value and local gradient
+    //weighted sum value, function activation value and local gradient
     public decimal V, F, G; 
-    //function activation and differencial
-    private DMath.FuncDel _func, _diff;
+    //A - function Activation, D - differential
+    public Dm.Fd A, D;
 
-    public Neuron(DMath.FuncDel func, DMath.FuncDel diff)
+    public Neuron(Dm.Fd func, Dm.Fd diff)
     {
         V = F = G = 0;
-        _func = func;
-        _diff = diff;
-    }
-
-    public void Activate()
-    {
-        F = _func(V);
+        A = func;
+        D = diff;
     }
 }
 
 class NeuralNetwork
 {
-    private Neuron[][] _neur;
-    //weights of synapses
+    //_n - neurons
+    private Neuron[][] _n;
+    //_w - weights of synapses
     private decimal[][,] _w;
 
-    public NeuralNetwork(int[] layers, string[][] fAct, decimal[][,]? w = null)
+    //l - layers num and struct, f - activation functions, w - weights
+    public NeuralNetwork(int[] l, string[][] f, decimal[][,]? w = null)
     {
-        //remember about the bias!!!
-        _neur = new Neuron[layers.Length][];
-        _w = new decimal[layers.Length - 1][,];
+        _n = new Neuron[l.Length][];
+        _w = new decimal[l.Length - 1][,];
 
-        for (var layerNum = 0; layerNum < layers.Length; ++layerNum)
+        //iL - iLayer, iN - iNeuron
+        for (var iL = 0; iL < l.Length; ++iL)
         {
-            _neur[layerNum] = new Neuron[layers[layerNum] + 1];
-            for (var neuronNum = 0; neuronNum < layers[layerNum]; ++neuronNum)
-                _neur[layerNum][neuronNum] = new Neuron(
-                    DMath.FuncList(fAct[layerNum][neuronNum]),
-                    DMath.DiffList(fAct[layerNum][neuronNum]));
-            _neur[layerNum][layers[layerNum]] = 
-                new Neuron(v => 1, v => 0);
+            _n[iL] = new Neuron[l[iL] + 1];
+            for (var iN = 0; iN < l[iL]; ++iN)
+                _n[iL][iN] = new Neuron(Dm.Fl(f[iL][iN]), Dm.Dl(f[iL][iN]));
+            _n[iL][l[iL]] = new Neuron(_ => 1, _ => 0);
         }
-
-        for (var synapseLayer = 0; synapseLayer < layers.Length - 1; ++synapseLayer)
+        
+        //iSl - iSynapse layer, iI - iInput, iO - iOutput, iB - iBias
+        for (var iSl = 0; iSl < l.Length - 1; ++iSl)
         {
-            _w[synapseLayer] = new decimal[layers[synapseLayer] + 1, layers[synapseLayer + 1]];
-            for (var input = 0; input <= layers[synapseLayer]; ++input)
-            for (var output = 0; output < layers[synapseLayer + 1]; ++output)
-                _w[synapseLayer][input, output] = w == null ? 
-                    0 : w[synapseLayer][input, output];
+            _w[iSl] = new decimal[l[iSl] + 1, l[iSl + 1]];
+            for (var iI = 0; iI < l[iSl]; ++iI)
+            for (var iO = 0; iO < l[iSl + 1]; ++iO)
+                _w[iSl][iI, iO] = w == null ? 0 : w[iSl][iI, iO];
+            for (var iB = 0; iB < l[iSl + 1]; ++iB)
+                _w[iSl][l[iSl], iB] = w == null ? 0 : w[iSl][l[iSl], iB];
             //TODO: bias neurons weight
         }
     }
-
+    
     public decimal[] Count(decimal[] data)
     {
-        if (data.Length != _neur[0].Length)
+        if (data.Length != _n[0].Length)
             return new[] { 0M };
-        
-        for (var i = 0; i < _neur[0].Length; ++i)
-            _neur[0][i].V = data[i];
-        
-        for (var layerNum = 1; layerNum < _neur.Length; ++layerNum)
-        for (var receiver = 0; receiver < _neur[layerNum].Length; ++receiver)
-            {
-                for (var sender = 0; sender < _neur[layerNum - 1].Length; ++layerNum)
-                    _neur[layerNum][receiver].V += _neur[layerNum - 1][sender].F *
-                                                   _w[layerNum - 1][sender, receiver];
-                _neur[layerNum][receiver].Activate();
-            }
 
-        var ans = new decimal[_neur[^1].Length];
+        for (var i = 0; i < _n[0].Length; ++i)
+            _n[0][i].F = _n[0][i].V = data[i];
+
+        //iL - iLayer num, iR - iReceiver, iS - iSender
+        for (var iL = 1; iL < _n.Length; ++iL)
+        for (var iR = 0; iR < _n[iL].Length - 1; ++iR)
+        {
+            _n[iL][iR].V = 0;
+            for (var iS = 0; iS < _n[iL - 1].Length; ++iL)
+                _n[iL][iR].V += _n[iL - 1][iS].F * _w[iL - 1][iS, iR];
+            _n[iL][iR].F = _n[iL][iR].A(_n[iL][iR].V);
+        }
+
+        var ans = new decimal[_n[^1].Length];
         for (var i = 0; i < ans.Length; ++i)
-            ans[i] = _neur[^1][i].F;
+            ans[i] = _n[^1][i].F;
 
         return ans;
     }
-}
 
+    private static decimal _dy = 0.01M;
+    
+    public void Train(decimal[] data)
+    {
+        if (data.Length != _n[^1].Length)
+            return;
+
+        for (var i = 0; i < _n[^1].Length; ++i)
+            _n[^1][i].G = _n[^1][i].F - data[i];
+
+        //iL - iLayer num, iR - iReceiver, iS - iSender
+        for (var iL = _n.Length - 1; iL > 0; --iL)
+        for (var iR = 0; iR < _n[iL - 1].Length; ++iR)
+        {
+            _n[iL][iR].V = 0;
+            for (var iS = 0; iS < _n[iL].Length - 1; ++iL)
+            {
+                _w[iL - 1][iS, iR] -= _dy * _n[iL][iS].G * _n[iL][iS].F;
+                _n[iL][iR].V += _n[iL - 1][iS].G * _w[iL - 1][iS, iR];
+            }
+            _n[iL][iR].G = _n[iL][iR].V * _n[iL][iR].D(_n[iL][iR].F);
+        }
+    }
+}
