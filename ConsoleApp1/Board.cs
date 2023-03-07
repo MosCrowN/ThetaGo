@@ -8,7 +8,7 @@ internal class Board
 {
     public States[,] Desk;
 
-    private States[,] _desk1, _desk2;
+    private States[,] _desk;
 
     public static (int ix, int iy) Selected;
     
@@ -16,8 +16,8 @@ internal class Board
     {
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
-        _desk1 = new States[size, size];
-        _desk2 = new States[size, size];
+        _desk = new States[size, size];
+        
         for (var i = 0; i < size; ++i)
         for (var j = 0; j < size; ++j)
                 Desk[i, j] = States.Free;
@@ -70,9 +70,9 @@ internal class Board
         /*/
         stopWatch.Stop();
         TimeSpan ts = stopWatch.Elapsed;
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
+        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}.{4:000}",
             ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds);
+            ts.Milliseconds, ts.Microseconds);
         Console.WriteLine("RunTime " + elapsedTime); // */
     }
 
@@ -80,13 +80,11 @@ internal class Board
     {
         for (var i = 0; i < Params.DeskSize + 2; ++i)
         for (var j = 0; j < Params.DeskSize + 2; ++j)
-            if (_desk1[i, j] != Desk[i, j])
+            if (_desk[i, j] != Desk[i, j])
             {
                 for (var ix = 0; ix < Params.DeskSize + 2; ++ix)
                 for (var iy = 0; iy < Params.DeskSize + 2; ++iy)
-                {
-                    _desk1[ix, iy] = Desk[ix, iy];
-                }
+                    _desk[ix, iy] = Desk[ix, iy];
 
                 return false;
             }
