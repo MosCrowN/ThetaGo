@@ -29,30 +29,33 @@ internal class Test
             Console.WriteLine("%");
         }
     }
+
     private static void Main()
-    { 
-        /*
+    {
+
         PrepareData();
 
-       var net = new NeuralNetwork(new[] { 784, 800, 10 }, new[] { "", "logistic", "logistic" });
-       decimal loss = 0;
-       for (var i = 0;;++i) {
-           net.Count(_images[_r.Next(0, 59999)]);
-           var exp = new decimal[10];
-           exp[_labels[_r.Next(0, 59999)]] = 1;
-           net.Train(exp);
-           if (i % 100 == 0)
-           {
-               Console.Write("Iteration: ");
-               Console.Write(i);
-               Console.Write(" , loss: ");
-               Console.WriteLine(loss);
-               loss = 0;
-           }
-           else loss += net.Loss();
-       }
-       */
+        var net = new NeuralNetwork(new[] { 784, 30, 20, 10 }, new[] { "", "sigma", "sigma", "sigma" });
+        decimal loss = 1;
+        for (var i = 0;; ++i)
+        {
+            var num = _r.Next(0, 59999);
+            net.Count(_images[num]);
+            var exp = new decimal[10];
+            exp[_labels[num]] = 1;
+            net.Train(exp);
+            if (i % 1000 == 0)
+            {
+                Console.Write("Iteration: ");
+                Console.Write(i);
+                Console.Write(" , loss: ");
+                Console.WriteLine(loss / 1000);
+                loss = 0;
+            }
+            else loss += net.Loss();
+        }
 
+        /*
         var testData = new[]
         {
             new[] { -1M, -1, -1 },
@@ -95,6 +98,7 @@ internal class Test
             Console.Write(" , Truly: ");
             Console.WriteLine(ans[i]);
         }
+        */
     }
 }
 
@@ -112,9 +116,10 @@ internal static class Dm
     }
     
     //E - exponent
+    //TODO: redo the exponent
     public static decimal E(decimal x)
     {
-        if (x > 64) return 0;
+        if (x is > 64 or < -64) return 0;
         decimal ans = 1, pow = x, i = 1;
         do
         {
@@ -134,8 +139,8 @@ internal static class Dm
     {
         return name switch
         {
-            "th" => v => 2 / (1 + E(0M-v)) - 1,
-            "logistic" => v => 1 / (1 + E(v)),
+            "th" => v => 2 / (1 + E(-v)) - 1,
+            "sigma" => v => 1 / (1 + E(-v)),
             "relu" => v => v > 0 ? v : 0,
             _ => v => v
         };
@@ -147,7 +152,7 @@ internal static class Dm
         return name switch
         {
             "th" => v => 0.5M * (1 + v) * (1 - v),
-            "logistic" => v => v * (1 - v),
+            "sigma" => v => v * (1 - v),
             "relu" => v => v > 0 ? 1 : 0,
             _ => _ => 1
         }; 
