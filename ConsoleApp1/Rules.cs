@@ -22,10 +22,8 @@ abstract class Dfs
         if (_desk[x, y + 1] == _color && IsAlive(x, y + 1) ||
             _desk[x, y + 1] == Board.States.Free) 
             return true;
-        if (_desk[x, y - 1] == _color && IsAlive(x, y - 1) ||
-            _desk[x, y - 1] == Board.States.Free) 
-            return true;       
-        return false;
+        return _desk[x, y - 1] == _color && IsAlive(x, y - 1) ||
+               _desk[x, y - 1] == Board.States.Free;
     }
     
     public void Capture(ref Board.States[,] desk, int x, int y)
