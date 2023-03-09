@@ -30,7 +30,7 @@ internal class Test
         }
     }
 
-    private static void Main()
+    private static void Man()
     {
 
         PrepareData();
