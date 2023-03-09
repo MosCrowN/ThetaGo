@@ -21,7 +21,7 @@ internal class Test
             _images[i] = new decimal[784];
             for (var j = 0; j < 28; ++j)
             for (var k = 0; k < 28; ++k)
-                _images[i][j * k] = t.Image[j, k];
+                _images[i][j * k] = t.Image[j, k] / 255M;
             
             if (++i % 6000 != 0) continue;
             Console.Write("Data prepare is ready for ");
@@ -35,24 +35,47 @@ internal class Test
 
         PrepareData();
 
-        var net = new NeuralNetwork(new[] { 784, 30, 20, 10 }, new[] { "", "sigma", "sigma", "sigma" });
-        decimal loss = 1;
-        for (var i = 0;; ++i)
+        var net = new NeuralNetwork(new[] { 784, 128, 10 }, new[] { "", "relu", "ratlog"});
+        decimal loss = 300;
+        for (var i = 0;i < 300000; ++i)
         {
             var num = _r.Next(0, 59999);
             net.Count(_images[num]);
             var exp = new decimal[10];
             exp[_labels[num]] = 1;
             net.Train(exp);
-            if (i % 1000 == 0)
+            if (i % 300 == 0)
             {
                 Console.Write("Iteration: ");
                 Console.Write(i);
                 Console.Write(" , loss: ");
-                Console.WriteLine(loss / 1000);
+                Console.WriteLine(loss / 300M);
                 loss = 0;
             }
             else loss += net.Loss();
+        }
+
+        for (var i = 0; i < 10; ++i)
+        {
+            var num = _r.Next(0, 59999);
+            var netAns = net.Count(_images[num]);
+            Console.WriteLine("Network: ");
+            for (int j = 0; j < 10; ++j)
+            {
+                Console.Write(j);
+                Console.Write(" : ");
+                Console.WriteLine(netAns[j]);
+            }
+
+            var exp = new decimal[10];
+            exp[_labels[num]] = 1;
+            Console.WriteLine("Right: ");
+            for (int j = 0; j < 10; ++j)
+            {
+                Console.Write(j);
+                Console.Write(" : ");
+                Console.WriteLine(exp[j]);
+            }
         }
 
         /*
@@ -139,8 +162,11 @@ internal static class Dm
     {
         return name switch
         {
-            "th" => v => 2 / (1 + E(-v)) - 1,
-            "sigma" => v => 1 / (1 + E(-v)),
+            "th" => v => v > 64 ? 1 : (v < -64 ? -1 : (2 / (1 + E(-v)) - 1)),
+            "logistic" => v =>v > 64 ? 1 : (v < -64 ? 0 : ( 1 / (1 + E(-v)))),
+            "ratsigm" => v => v > 0 ? 
+                (v + 0.5M) / (1 + v) : 0.5M / (1 - v),
+            "ratlog" => v => v / (v > 0 ? 1 + v : 1 - v),
             "relu" => v => v > 0 ? v : 0,
             _ => v => v
         };
@@ -152,7 +178,9 @@ internal static class Dm
         return name switch
         {
             "th" => v => 0.5M * (1 + v) * (1 - v),
-            "sigma" => v => v * (1 - v),
+            "logistic" => v => v * (1 - v),
+            "ratsigm" => v => 0.5M / ( 1 + v *(v > 0.5M ? v + 2 : v - 2)),
+            "ratlog" => v => 1 / (1 + v * (v > 0 ? v + 2 : v - 2)),
             "relu" => v => v > 0 ? 1 : 0,
             _ => _ => 1
         }; 
@@ -215,7 +243,7 @@ class NeuralNetwork
             return new[] { 0M };
 
         for (var i = 0; i < _n[0].Length - 1; ++i)
-            _n[0][i].F = _n[0][i].V = data[i];
+            _n[0][i].F = _n[0][i].A(_n[0][i].V = data[i]);
 
         //iL - iLayer num, iR - iReceiver, iS - iSender
         for (var iL = 1; iL < _n.Length; ++iL)
@@ -238,7 +266,7 @@ class NeuralNetwork
         return ans;
     }
 
-    private static decimal _dy = 0.001M;
+    private static decimal _dy = 0.0001M;
 
     private decimal _loss;
     public void Train(decimal[] data)
