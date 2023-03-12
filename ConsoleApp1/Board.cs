@@ -4,7 +4,7 @@ using SFML.System;
 
 namespace ConsoleApp1;
 
-internal class Board
+public class Board
 {
     public States[,] Desk;
 
@@ -37,15 +37,12 @@ internal class Board
 
     private static bool _isWhite;
 
-    public void PutStone(int ix = -1000, int iy = -1000)
+    public void PutStone()
     {
-        /*/
-        Stopwatch stopWatch = new Stopwatch();
-        stopWatch.Start(); // */
-
-        if (ix == -1000 || iy == -1000) (ix, iy) = Selected;
-        if (ix < 0 || iy < 0 || ix > Params.DeskSize || iy > Params.DeskSize)
+        if (Selected.ix < 0 || Selected.ix > Params.DeskSize ||
+            Selected.iy < 0 || Selected.iy > Params.DeskSize)
             return;
+        (var ix, var iy) = Selected;
         
         if (Desk[ix + 1, iy + 1] != States.Free) return;
         
@@ -53,8 +50,6 @@ internal class Board
         else Desk[ix + 1, iy + 1] = States.Black;
         _isWhite = !_isWhite;
         
-        //TODO: fix Ko rule
-        //TODO: check if the stone surrounded
         //TODO: paint previous stone
 
         if (KoCheck(ix + 1, iy + 1)) return;
@@ -66,14 +61,19 @@ internal class Board
         _arbiter!.Capture(ref Desk,ix + 2, iy + 1); 
         _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
         _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
+    }
+
+    public void PutStone(int ix, int iy, bool isWhite)
+    {
+        if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
+        else Desk[ix + 1, iy + 1] = States.Black;
         
-        /*/
-        stopWatch.Stop();
-        TimeSpan ts = stopWatch.Elapsed;
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}.{4:000}",
-            ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds, ts.Microseconds);
-        Console.WriteLine("RunTime " + elapsedTime); // */
+        if (_arbiter == null) return;
+        _arbiter!.Capture(ref Desk,ix, iy + 1);
+        _arbiter!.Capture(ref Desk,ix + 1, iy);
+        _arbiter!.Capture(ref Desk,ix + 2, iy + 1); 
+        _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
+        _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
     }
 
     private bool KoCheck(int x, int y)

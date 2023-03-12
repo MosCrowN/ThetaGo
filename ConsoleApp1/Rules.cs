@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApp1;
 
-abstract class Dfs
+public abstract class Dfs
 {
     private Board.States[,]? _desk = new Board.States[1,1];
 
@@ -48,7 +48,7 @@ abstract class Dfs
             }
     }
 }
-internal interface IArbiter
+public interface IArbiter
 {
     public bool IsMoveAllowed(in Board.States[,] desk, bool isWhite);
 
@@ -57,7 +57,7 @@ internal interface IArbiter
     public (float white, float black) Score(in Board.States[,] desk);
 }
 
-internal class IngRulesDfs : Dfs, IArbiter 
+public class IngRulesDfs : Dfs, IArbiter 
 {
     public bool IsMoveAllowed(in Board.States[,] desk, bool isWhite) => true;
 
