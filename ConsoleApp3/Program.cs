@@ -24,8 +24,7 @@ internal static class Education
         
         model.compile(loss: keras.losses.BinaryCrossentropy(),
             optimizer: keras.optimizers.Adam(), metrics: new[] { "acc" });
-        
-        
+
         if (data.Data is null || data.Label is null)
             throw new NullReferenceException();
         model.fit(data.Data, data.Label,

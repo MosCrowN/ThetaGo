@@ -11,7 +11,7 @@ internal class Button : Drawable
 
     public Text? T;
 
-    public int MaxLevel;
+    public int MaxLevel, CurLevel;
 
     //TODO: paint the pressed button and make noise
     //public bool IsActivated;
@@ -33,17 +33,23 @@ internal class Button : Drawable
     public void Draw(RenderTarget target, RenderStates states)
     {
         target.Draw(S);
-        if (R != null)
-            target.Draw(R);
+        
         if (T == null) return;
-        var str = string.Empty;
-        foreach (var i in T!.DisplayedString)
+        
+        if (R != null)
         {
-            str += i;
-            if (i != ':') continue;
-            T!.DisplayedString = str + ' ' + (int)(MaxLevel * R!.Scale.X);
-            break;
+            target.Draw(R);
+            var str = string.Empty;
+            foreach (var i in T!.DisplayedString)
+            {
+                str += i;
+                if (i != ':') continue;
+                CurLevel = (int)(MaxLevel * R.Scale.X);
+                T!.DisplayedString = str + ' ' + CurLevel;
+                break;
+            }
         }
+
         target.Draw(T);
     }
 }
@@ -82,11 +88,40 @@ internal class ButtonLayout: Drawable
         {
             if (_selected < 0 || _buttons[_selected].R == null)
                 return -1;
-            return (int)(100 * _buttons[_selected].R!.Scale.X);
+            return _buttons[_selected].CurLevel;
         }
     }
 
     //TODO: scrolling
+
+    public void Draw(RenderTarget target, RenderStates states)
+    {
+        foreach (var i in _buttons)
+            target.Draw(i);
+    }
+    
+    public void Compile(int x0, int x1, int y0, int y1)
+    {
+        for (var i = 0; i < _buttons.Count; ++i)
+        {
+            _buttons[i].S.Scale = new Vector2f((float)(x1 - x0) / _buttons[i].S.Texture.Size.X,
+                (float)(y1 - y0) / (_buttons.Count + 1) / _buttons[i].S.Texture.Size.Y);
+            _buttons[i].S.Position = new Vector2f(x0, y0 + (y1 - y0) / (_buttons.Count + 1) * i);
+            if (_buttons[i].T == null) continue;
+            var size = new Vector2f(_buttons[i].S.GetGlobalBounds().Width,
+                _buttons[i].S.GetGlobalBounds().Height);
+            var oldTextSize = new Vector2f(_buttons[i].T!.GetGlobalBounds().Width,
+                _buttons[i].T!.GetGlobalBounds().Height);
+            var newTextSize = new Vector2f(_buttons[i].T!.DisplayedString.Length * (size.X / 25f), 0.33f * size.Y);
+            _buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
+            _buttons[i].T!.Position = _buttons[i].S.Position + (size - newTextSize) / 2f;
+            if (_buttons[i].R == null) continue;
+            _buttons[i].R!.Size = new Vector2f(size.X, 3);
+            _buttons[i].R!.Position = new Vector2f(_buttons[i].S.Position.X,
+                _buttons[i].S.Position.Y + size.Y / 2);
+        }
+    }
+
     public void Add(string text, Texture? texture = null)
     {
         var button = new Button();
@@ -110,33 +145,5 @@ internal class ButtonLayout: Drawable
         };
         button.MaxLevel = maxLevel;
         _buttons.Add(button);
-    }
-
-    public void Compile(int x0, int x1, int y0, int y1)
-    {
-        for (var i = 0; i < _buttons.Count; ++i)
-        {
-            _buttons[i].S.Scale = new Vector2f((float)(x1 - x0) / _buttons.Count / _buttons[i].S.Texture.Size.X,
-                (float)(y1 - y0) / (_buttons.Count + 1) / _buttons[i].S.Texture.Size.Y);
-            _buttons[i].S.Position = new Vector2f(x0, y0 + (y1 - y0) / (_buttons.Count + 1) * i);
-            if (_buttons[i].T == null) continue;
-            var size = new Vector2f(_buttons[i].S.GetGlobalBounds().Width,
-                _buttons[i].S.GetGlobalBounds().Height);
-            var oldTextSize = new Vector2f(_buttons[i].T!.GetGlobalBounds().Width,
-                _buttons[i].T!.GetGlobalBounds().Height);
-            var newTextSize = new Vector2f(_buttons[i].T!.DisplayedString.Length * (size.X / 25f), 0.33f * size.Y);
-            _buttons[i].T!.Scale = new Vector2f(newTextSize.X / oldTextSize.X, newTextSize.Y / oldTextSize.Y);
-            _buttons[i].T!.Position = _buttons[i].S.Position + (size - newTextSize) / 2f;
-            if (_buttons[i].R == null) continue;
-            _buttons[i].R!.Size = new Vector2f(size.X, 3);
-            _buttons[i].R!.Position = new Vector2f(_buttons[i].S.Position.X,
-                _buttons[i].S.Position.Y + size.Y / 2);
-        }
-    }
-
-    public void Draw(RenderTarget target, RenderStates states)
-    {
-        foreach (var i in _buttons)
-            target.Draw(i);
     }
 }

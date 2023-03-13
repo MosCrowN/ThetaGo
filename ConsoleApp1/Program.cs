@@ -5,23 +5,9 @@ namespace ConsoleApp1;
 
 internal static class Params
 {
-    private const int MaxMusicVolume = 100;
-    private static int _musicVolume = 100;
+    public static int MusicVolume = 100;
 
-    public static int MusicVolume
-    {
-        set => _musicVolume = (int)(MaxMusicVolume / 100f * value);
-        get => _musicVolume;
-    }
-
-    private const int MaxDeskSize = 35;
-    private static  int _deskSize = 19;
-    
-    public static int DeskSize 
-    {
-        set => _deskSize = (int)(MaxDeskSize / 100f * value);
-        get => _deskSize;
-    }
+    public static int DeskSize = 19;
 
     public static readonly Font Albert = new("font_albert.ttf");
 

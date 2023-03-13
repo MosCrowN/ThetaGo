@@ -7,8 +7,8 @@ internal class SettingsWindow : Window
     public SettingsWindow()
     {
         Layout = new ButtonLayout();
-        Layout.Add("MUSIC VOLUME: 100", 100);
-        Layout.Add("DESK SIZE: 19", 35, 19);
+        Layout.Add("MUSIC VOLUME: 100", 100, Params.MusicVolume);
+        Layout.Add("DESK SIZE: 19", 35, Params.DeskSize);
         Layout.Add("DIFFICULTY: 10", 10);
         Layout.Add("MULTIPLAYER");
         Layout.Add("SAVE & BACK");
