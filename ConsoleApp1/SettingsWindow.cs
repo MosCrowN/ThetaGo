@@ -7,11 +7,14 @@ internal class SettingsWindow : Window
     public SettingsWindow()
     {
         Layout = new ButtonLayout();
-        Layout.Add("MUSIC VOLUME: 100", 100, Params.MusicVolume);
-        Layout.Add("DESK SIZE: 19", 35, Params.DeskSize);
-        Layout.Add("DIFFICULTY: 10", 10);
-        Layout.Add("MULTIPLAYER");
-        Layout.Add("SAVE & BACK");
+        Layout.Add("MUSIC VOLUME: 100",
+            100, Params.MenuButton, Params.MusicVolume);
+        Layout.Add("DESK SIZE: 19",
+            35, Params.MenuButton, Params.DeskSize);
+        Layout.Add("DIFFICULTY: 10",
+            10, Params.MenuButton);
+        Layout.Add("MULTIPLAYER", Params.MenuButton);
+        Layout.Add("SAVE & BACK", Params.MenuButton);
         Layout.Compile(0, (int)SfWindow.Size.X/ 2, 0, (int)SfWindow.Size.Y);
     }
     

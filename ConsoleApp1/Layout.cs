@@ -66,10 +66,10 @@ internal class ButtonLayout: Drawable
 
         for (var i = 0; i < _buttons.Count; ++i)
         {
-            var lx = (int)(x - _buttons[i].S!.Position.X);
-            var ly = (int)(y - _buttons[i].S!.Position.Y);
-            if (lx < 0 || lx > _buttons[i].S!.GetGlobalBounds().Width ||
-                ly < 0 || ly > _buttons[i].S!.GetGlobalBounds().Height) 
+            var lx = (int)(x - _buttons[i].S.Position.X);
+            var ly = (int)(y - _buttons[i].S.Position.Y);
+            if (lx < 0 || lx > _buttons[i].S.GetGlobalBounds().Width ||
+                ly < 0 || ly > _buttons[i].S.GetGlobalBounds().Height) 
                 continue;
             _selected = i;
             //TODO: change the button text
@@ -122,20 +122,18 @@ internal class ButtonLayout: Drawable
         }
     }
 
-    public void Add(string text, Texture? texture = null)
+    public void Add(string text, Texture texture)
     {
         var button = new Button();
-        if (texture != null)
-            button.S.Texture = texture;
+        button.S.Texture = texture;
         button.T!.DisplayedString = text;
         _buttons.Add(button);
     }
 
-    public void Add(string text, int maxLevel, int curLevel = -1, Texture? texture = null)
+    public void Add(string text, int maxLevel, Texture texture, int curLevel = -1)
     {
         var button = new Button();
-        if (texture != null)
-            button.S.Texture = texture;
+        button.S.Texture = texture;
         button.T!.DisplayedString = text;
         button.R = new RectangleShape
         {

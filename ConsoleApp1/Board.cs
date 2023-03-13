@@ -4,13 +4,16 @@ using SFML.System;
 
 namespace ConsoleApp1;
 
+[Serializable]
 public class Board
 {
-    public States[,] Desk;
+    public readonly States[,] Desk;
 
-    private IArbiter? _arbiter;
+    private IArbiter _arbiter;
 
-    public Board(IArbiter? arbiter = null)
+    public Board() : this(new IngRules()) {}
+    
+    public Board(IArbiter arbiter)
     {
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
@@ -50,34 +53,56 @@ public class Board
                Desk[x, y - 1] == States.Free;
     }
     
-    private int _captured;
+    private int _capturedWhite;
     
-    private void Capture(int x, int y)
+    private void Capture()
     {
-        if (Desk[x,y] != States.White &&
-            Desk[x,y] != States.Black)
-            return;
-        
-        _color = Desk[x, y];
-        
-        var flag = IsAlive(x, y);
+        void CaptureGroup(int x, int y)
+        {
+            if (Desk[x, y] != States.White &&
+                Desk[x, y] != States.Black)
+                return;
 
-        for (var ix = 1; ix <= 19; ++ix)
-        for (var iy = 1; iy <= 19; ++iy)
-            if (Desk[ix, iy] == States.Visited)
-            {
-                if (flag)
+            _color = Desk[x, y];
+
+            var flag = IsAlive(x, y);
+
+            for (var ix = 1; ix <= 19; ++ix)
+            for (var iy = 1; iy <= 19; ++iy)
+                if (Desk[ix, iy] == States.Visited)
                 {
-                    Desk[ix, iy] = _color;
-                    continue;
+                    if (flag)
+                    {
+                        Desk[ix, iy] = _color;
+                        continue;
+                    }
+
+                    Desk[ix, iy] = States.Free;
+                    if (_color == States.White)
+                        --_capturedWhite;
+                    else ++_capturedWhite;
                 }
-                Desk[ix, iy] = States.Free;
-                if (_color == States.White) 
-                    --_captured;
-                else ++_captured;
-            }
+        }
+        
+        for (var i = 1; i <= Params.DeskSize; ++i)
+        for (var j = 1; j <= Params.DeskSize; ++j)
+        {
+            if (_isWhite && Desk[i, j] == States.Black)
+                CaptureGroup(i, j);
+            else if (!_isWhite && Desk[i, j] == States.White)
+                CaptureGroup(i, j);
+        }
+        
+        for (var i = 1; i <= Params.DeskSize; ++i)
+        for (var j = 1; j <= Params.DeskSize; ++j)
+        {
+            if (!_isWhite && Desk[i, j] == States.Black)
+                CaptureGroup(i, j);
+            else if (_isWhite && Desk[i, j] == States.White)
+                CaptureGroup(i, j);
+        }
     }
-    
+
     private bool _isWhite;
     
     public static (int ix, int iy) Selected;
@@ -87,7 +112,7 @@ public class Board
         if (Selected.ix < 0 || Selected.ix > Params.DeskSize ||
             Selected.iy < 0 || Selected.iy > Params.DeskSize)
             return;
-        (var ix, var iy) = Selected;
+        var (ix, iy) = Selected;
         
         if (Desk[ix + 1, iy + 1] != States.Free) return;
         
@@ -98,29 +123,12 @@ public class Board
 
         if (KoCheck(ix + 1, iy + 1)) return;
         
-        //check captured stones
-        for (var i = 1; i <= Params.DeskSize; ++i)
-        for (var j = 1; j <= Params.DeskSize; ++j)
-        {
-            if (_isWhite && Desk[i, j] == States.Black)
-                Capture(i, j);
-            else if (!_isWhite && Desk[i, j] == States.White)
-                Capture(i, j);
-        }
-        
-        for (var i = 1; i <= Params.DeskSize; ++i)
-        for (var j = 1; j <= Params.DeskSize; ++j)
-        {
-            if (!_isWhite && Desk[i, j] == States.Black)
-                Capture(i, j);
-            else if (_isWhite && Desk[i, j] == States.White)
-                Capture(i, j);
-        }
-        
+         Capture();
+
         _isWhite = !_isWhite;
     }
 
-    private States[,] _desk;
+    private readonly States[,] _desk;
     
     private bool KoCheck(int x, int y)
     {

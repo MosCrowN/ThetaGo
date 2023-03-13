@@ -9,9 +9,16 @@ internal class GameWindow : Window
 
     private readonly BoardSprite _sprite;
 
+    public GameWindow(string path)
+    {
+        _board = Serializer<Board>.Deserialize(path);
+        Params.DeskSize = _board.Desk.GetLength(0) - 2;
+        _sprite = new BoardSprite(_board, (int)SfWindow.Size.X, (int)SfWindow.Size.Y);
+    }
+    
     public GameWindow()
     {
-        _board = new Board(new IngRulesDfs());
+        _board = new Board();
         _sprite = new BoardSprite(_board, (int)SfWindow.Size.X, (int)SfWindow.Size.Y);
     }
 
@@ -40,6 +47,7 @@ internal class GameWindow : Window
     protected override void SfWindowOnMouseButtonReleased(object? sender, MouseButtonEventArgs e)
     {
         _board.PutStone();
+        Serializer<Board>.Serialize(_board, "board.soap");
     }
 
     protected override void SfWindowOnKeyReleased(object? sender, KeyEventArgs e)

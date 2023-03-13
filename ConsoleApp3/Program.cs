@@ -1,10 +1,10 @@
-﻿using Tensorflow;
-using System.Text;
-using System.Text.Json;
-using Tensorflow.Keras.Engine;
+﻿using System.Text;
+
 using static Tensorflow.KerasApi;
 using Tensorflow.NumPy;
-using Tensorflow.Keras.Utils;
+
+using System.Text.Json;
+using Tensorflow;
 
 namespace ConsoleApp3;
 
@@ -25,6 +25,7 @@ internal static class Education
         model.compile(loss: keras.losses.BinaryCrossentropy(),
             optimizer: keras.optimizers.Adam(), metrics: new[] { "acc" });
 
+        //*
         if (data.Data is null || data.Label is null)
             throw new NullReferenceException();
         model.fit(data.Data, data.Label,
@@ -71,20 +72,41 @@ internal static class Education
                    "W[ln];B[mi];W[nj];B[mj];W[mg];B[ng];W[mh];B[of];W[ni];" +
                    "B[oh];W[lf];B[oi];W[ml];B[pj];W[qj];B[qk])";
         //*/
+        /*
         var gameRes = data._data.ToArray();
         var test = new float[gameRes.Length,362];
         for (var i = 0; i < gameRes.Length; ++i)
         for (var j = 0; j < 362; ++j)
             test[i, j] = gameRes[i][j];
         //*/
-        var path = "model.xml";
         
-        MySerializer<Sequential>.Serialize(model, path);
-        var model1 = MySerializer<Sequential>.Deserialize(path);
+        var model1 = keras.Sequential();
+        model1.add(keras.layers.Input(362));
+        model1.add(keras.layers.Dense(128, activation: "tanh"));
+        model1.add(keras.layers.Dense(1, activation: "sigmoid"));
+        model1.compile(loss: keras.losses.BinaryCrossentropy(),
+            optimizer: keras.optimizers.Adam(), metrics: new[] { "acc" });
 
-        Console.WriteLine(model1.predict(np.array(test)));
-        Console.WriteLine(model.predict(np.array(test)));
+        var a = new List<IVariableV1>();
+        
+        for (int i = 0; i < 4; ++i)
+        {
+            var path = "model" + i + ".json";
 
+            var y = model.Weights;
+            var z = y[i].numpy().ToArray<float>();
+            var json = JsonSerializer.Serialize(z);
+            var z1 = JsonSerializer.Deserialize<float[]>(json);
+
+            a.Add(new ResourceVariable(np.array(z1)));
+        }
+
+        a[0].AsTensor().set_shape(new Shape(362, 128));
+
+        model1.Weights = a;
+        
+        Console.WriteLine(model1.predict(data.Data));
+        Console.WriteLine(model.predict(data.Data));
     }
 
 }

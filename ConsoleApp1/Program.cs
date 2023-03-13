@@ -9,19 +9,19 @@ internal static class Params
 
     public static int DeskSize = 19;
 
-    public static readonly Font Albert = new("font_albert.ttf");
+    public static readonly Font Albert = new("./fonts/font_albert.ttf");
 
-    public static readonly Music Ost = new ("main_theme.wav");
+    public static readonly Music Ost = new ("./songs/main_theme.wav");
 
-    public static readonly Texture MenuBg = new ("bg_main_menu.jpg");
+    public static readonly Texture MenuBg = new ("./pictures/bg_main_menu.jpg");
 
-    public static readonly Texture DeskBg = new("wood.jpeg");
+    public static readonly Texture DeskBg = new("./pictures/wood.jpeg");
 
-    public static readonly Texture MenuButton = new ("button.png");
+    public static readonly Texture MenuButton = new ("./pictures/button.png");
 
-    public static readonly Texture WhiteStone = new ("white.png");
+    public static readonly Texture WhiteStone = new ("./pictures/white.png");
     
-    public static readonly Texture BlackStone = new ("black.png");
+    public static readonly Texture BlackStone = new ("./pictures/black.png");
 }
 
 internal static class Start
@@ -32,7 +32,9 @@ internal static class Start
         Window window = new MainWindow();
         while (true)
         {
-            if (window.Select == 1 && window is MainWindow)
+            if (window.Select == 0 && window is MainWindow)
+                window = new GameWindow("board.soap");
+            else if (window.Select == 1 && window is MainWindow)
                 window = new GameWindow();
             else if (window.Select == 2 && window is MainWindow)
                 window = new SettingsWindow();
