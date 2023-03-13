@@ -6,7 +6,13 @@ internal class SettingsWindow : Window
 {
     public SettingsWindow()
     {
-        Layout = LayoutFactory.Settings(SfWindow.Size.X, SfWindow.Size.Y);
+        Layout = new ButtonLayout();
+        Layout.Add("MUSIC VOLUME: 100", 100);
+        Layout.Add("DESK SIZE: 19", 35, 19);
+        Layout.Add("DIFFICULTY: 10", 10);
+        Layout.Add("MULTIPLAYER");
+        Layout.Add("SAVE & BACK");
+        Layout.Compile(0, (int)SfWindow.Size.X/ 2, 0, (int)SfWindow.Size.Y);
     }
     
     public override void Loop()
@@ -34,12 +40,10 @@ internal class SettingsWindow : Window
         {
             case 0:
                 Params.MusicVolume = Layout!.Slider;
-                Layout!.Buttons![0].UpdTxt(Params.MusicVolume);
                 Params.Ost.Volume = Params.MusicVolume;
                 break;
             case 1:
-                Params.DeskSize = Layout!.Slider;
-                Layout!.Buttons![1].UpdTxt(Params.DeskSize); 
+                Params.DeskSize = Layout!.Slider; 
                 break;
         }
     }
@@ -53,12 +57,10 @@ internal class SettingsWindow : Window
         {
             case 0:
                 Params.MusicVolume = Layout!.Slider;
-                Layout!.Buttons![0].UpdTxt(Params.MusicVolume);
                 Params.Ost.Volume = Params.MusicVolume;
                 break;
             case 1:
                 Params.DeskSize = Layout!.Slider;
-                Layout!.Buttons![1].UpdTxt(Params.DeskSize);
                 break;
         }
     }

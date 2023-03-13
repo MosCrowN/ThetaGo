@@ -8,7 +8,13 @@ internal class MainWindow : Window
 {
     public MainWindow()
     {
-        Layout = LayoutFactory.MainMenu(SfWindow.Size.X, SfWindow.Size.Y);
+        Layout = new ButtonLayout();
+        Layout.Add("CONTINUE");
+        Layout.Add("NEW GAME");
+        Layout.Add("SETTINGS");
+        Layout.Add("EXIT");
+        Layout.Compile(0, (int)SfWindow.Size.X/ 2, 0, (int)SfWindow.Size.Y);
+        //LayoutFactory.MainMenu(SfWindow.Size.X, SfWindow.Size.Y);
     }
     
     public override void Loop()
