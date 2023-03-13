@@ -1,5 +1,4 @@
-﻿//using System.Diagnostics;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.System;
 
 namespace ConsoleApp1;
@@ -9,7 +8,7 @@ public class Board
 {
     public readonly States[,] Desk;
 
-    private IArbiter _arbiter;
+    public IArbiter Arbiter;
 
     public Board() : this(new IngRules()) {}
     
@@ -17,7 +16,7 @@ public class Board
     {
         var size = Params.DeskSize + 2;
         Desk = new States[size, size];
-        _desk = new States[size, size];
+        PrevDesk = new States[size, size];
         
         for (var i = 0; i < size; ++i)
         for (var j = 0; j < size; ++j)
@@ -30,7 +29,7 @@ public class Board
             Desk[size - 1, i] = States.Edge;
         }
 
-        _arbiter = arbiter;
+        Arbiter = arbiter;
     }
 
     private States _color;
@@ -52,60 +51,60 @@ public class Board
         return Desk[x, y - 1] == _color && IsAlive(x, y - 1) ||
                Desk[x, y - 1] == States.Free;
     }
-    
-    private int _capturedWhite;
-    
-    private void Capture()
+
+    public int CapturedWhite;
+
+    private void CaptureGroup(int x, int y)
     {
-        void CaptureGroup(int x, int y)
-        {
-            if (Desk[x, y] != States.White &&
-                Desk[x, y] != States.Black)
-                return;
+        if (Desk[x, y] != States.White &&
+            Desk[x, y] != States.Black)
+            return;
 
-            _color = Desk[x, y];
+        _color = Desk[x, y];
 
-            var flag = IsAlive(x, y);
+        var flag = IsAlive(x, y);
 
-            for (var ix = 1; ix <= 19; ++ix)
-            for (var iy = 1; iy <= 19; ++iy)
-                if (Desk[ix, iy] == States.Visited)
+        for (var ix = 1; ix <= 19; ++ix)
+        for (var iy = 1; iy <= 19; ++iy)
+            if (Desk[ix, iy] == States.Visited)
+            {
+                if (flag)
                 {
-                    if (flag)
-                    {
-                        Desk[ix, iy] = _color;
-                        continue;
-                    }
-
-                    Desk[ix, iy] = States.Free;
-                    if (_color == States.White)
-                        --_capturedWhite;
-                    else ++_capturedWhite;
+                    Desk[ix, iy] = _color;
+                    continue;
                 }
-        }
-        
-        for (var i = 1; i <= Params.DeskSize; ++i)
-        for (var j = 1; j <= Params.DeskSize; ++j)
-        {
-            if (_isWhite && Desk[i, j] == States.Black)
-                CaptureGroup(i, j);
-            else if (!_isWhite && Desk[i, j] == States.White)
-                CaptureGroup(i, j);
-        }
-        
-        for (var i = 1; i <= Params.DeskSize; ++i)
-        for (var j = 1; j <= Params.DeskSize; ++j)
-        {
-            if (!_isWhite && Desk[i, j] == States.Black)
-                CaptureGroup(i, j);
-            else if (_isWhite && Desk[i, j] == States.White)
-                CaptureGroup(i, j);
-        }
+
+                Desk[ix, iy] = States.Free;
+                if (_color == States.White)
+                    --CapturedWhite;
+                else ++CapturedWhite;
+            }
     }
 
-    private bool _isWhite;
+    private void Capture(int ix, int iy)
+    {
+        var color = IsWhite ? 
+            States.Black : States.White;
+        
+        if (Desk[ix + 1, iy] == color)
+            CaptureGroup(ix + 1, iy);
+        if (Desk[ix - 1, iy] == color)
+            CaptureGroup(ix - 1, iy);
+        if (Desk[ix, iy + 1] == color)
+            CaptureGroup(ix, iy + 1);
+        if (Desk[ix, iy - 1] == color)
+            CaptureGroup(ix, iy - 1);
+
+        CaptureGroup(ix + 1, iy);
+        CaptureGroup(ix - 1, iy);
+        CaptureGroup(ix, iy + 1);
+        CaptureGroup(ix, iy - 1);
+        CaptureGroup(ix, iy);
+    }
+
+    public bool IsWhite;
     
-    public static (int ix, int iy) Selected;
+    public static (int ix, int iy) Selected { set; get; }
     
     public void PutStone()
     {
@@ -116,29 +115,29 @@ public class Board
         
         if (Desk[ix + 1, iy + 1] != States.Free) return;
         
-        if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
+        if (IsWhite) Desk[ix + 1, iy + 1] = States.White;
         else Desk[ix + 1, iy + 1] = States.Black;
 
         //TODO: paint previous stone
 
         if (KoCheck(ix + 1, iy + 1)) return;
         
-         Capture();
+        Capture(ix + 1, iy + 1);
 
-        _isWhite = !_isWhite;
+        IsWhite = !IsWhite;
     }
 
-    private readonly States[,] _desk;
+    public readonly States[,] PrevDesk;
     
     private bool KoCheck(int x, int y)
     {
         for (var i = 0; i < Params.DeskSize + 2; ++i)
         for (var j = 0; j < Params.DeskSize + 2; ++j)
-            if (_desk[i, j] != Desk[i, j])
+            if (PrevDesk[i, j] != Desk[i, j])
             {
                 for (var ix = 0; ix < Params.DeskSize + 2; ++ix)
                 for (var iy = 0; iy < Params.DeskSize + 2; ++iy)
-                    _desk[ix, iy] = Desk[ix, iy];
+                    PrevDesk[ix, iy] = Desk[ix, iy];
 
                 return false;
             }
