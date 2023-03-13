@@ -8,10 +8,8 @@ public class Board
 {
     public States[,] Desk;
 
-    private States[,] _desk;
+    private IArbiter? _arbiter;
 
-    public static (int ix, int iy) Selected;
-    
     public Board(IArbiter? arbiter = null)
     {
         var size = Params.DeskSize + 2;
@@ -30,13 +28,60 @@ public class Board
         }
 
         _arbiter = arbiter;
-        _isWhite = false;
+    }
+
+    private States _color;
+
+    private bool IsAlive(int x, int y)
+    {
+        if (Desk[x, y] == States.Free) 
+            return true;
+        Desk[x, y] = States.Visited;
+        if (Desk[x + 1, y] == _color && IsAlive(x + 1, y) ||
+            Desk[x + 1, y] == States.Free) 
+            return true;
+        if (Desk[x - 1, y] == _color && IsAlive(x - 1, y) ||
+            Desk[x - 1, y] == States.Free) 
+            return true;
+        if (Desk[x, y + 1] == _color && IsAlive(x, y + 1) ||
+            Desk[x, y + 1] == States.Free) 
+            return true;
+        return Desk[x, y - 1] == _color && IsAlive(x, y - 1) ||
+               Desk[x, y - 1] == States.Free;
     }
     
-    private IArbiter? _arbiter;
+    private int _captured;
+    
+    private void Capture(int x, int y)
+    {
+        if (Desk[x,y] != States.White &&
+            Desk[x,y] != States.Black)
+            return;
+        
+        _color = Desk[x, y];
+        
+        var flag = IsAlive(x, y);
 
-    private static bool _isWhite;
-
+        for (var ix = 1; ix <= 19; ++ix)
+        for (var iy = 1; iy <= 19; ++iy)
+            if (Desk[ix, iy] == States.Visited)
+            {
+                if (flag)
+                {
+                    Desk[ix, iy] = _color;
+                    continue;
+                }
+                Desk[ix, iy] = States.Free;
+                if (_color == States.White) 
+                    --_captured;
+                else ++_captured;
+            }
+    }
+    
+    private bool _isWhite;
+    
+    public static (int ix, int iy) Selected;
+    
     public void PutStone()
     {
         if (Selected.ix < 0 || Selected.ix > Params.DeskSize ||
@@ -48,34 +93,35 @@ public class Board
         
         if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
         else Desk[ix + 1, iy + 1] = States.Black;
-        _isWhite = !_isWhite;
-        
+
         //TODO: paint previous stone
 
         if (KoCheck(ix + 1, iy + 1)) return;
         
-        //check 4 near stones
-        if (_arbiter == null) return;
-        _arbiter!.Capture(ref Desk,ix, iy + 1);
-        _arbiter!.Capture(ref Desk,ix + 1, iy);
-        _arbiter!.Capture(ref Desk,ix + 2, iy + 1); 
-        _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
-        _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
-    }
-
-    public void PutStone(int ix, int iy, bool isWhite)
-    {
-        if (_isWhite) Desk[ix + 1, iy + 1] = States.White;
-        else Desk[ix + 1, iy + 1] = States.Black;
+        //check captured stones
+        for (var i = 1; i <= Params.DeskSize; ++i)
+        for (var j = 1; j <= Params.DeskSize; ++j)
+        {
+            if (_isWhite && Desk[i, j] == States.Black)
+                Capture(i, j);
+            else if (!_isWhite && Desk[i, j] == States.White)
+                Capture(i, j);
+        }
         
-        if (_arbiter == null) return;
-        _arbiter!.Capture(ref Desk,ix, iy + 1);
-        _arbiter!.Capture(ref Desk,ix + 1, iy);
-        _arbiter!.Capture(ref Desk,ix + 2, iy + 1); 
-        _arbiter!.Capture(ref Desk,ix + 1, iy + 2);
-        _arbiter!.Capture(ref Desk,ix + 1, iy + 1);
+        for (var i = 1; i <= Params.DeskSize; ++i)
+        for (var j = 1; j <= Params.DeskSize; ++j)
+        {
+            if (!_isWhite && Desk[i, j] == States.Black)
+                Capture(i, j);
+            else if (_isWhite && Desk[i, j] == States.White)
+                Capture(i, j);
+        }
+        
+        _isWhite = !_isWhite;
     }
 
+    private States[,] _desk;
+    
     private bool KoCheck(int x, int y)
     {
         for (var i = 0; i < Params.DeskSize + 2; ++i)
@@ -88,8 +134,7 @@ public class Board
 
                 return false;
             }
-
-        _isWhite = !_isWhite;
+        
         Desk[x, y] = States.Free;
         return true;
     }
